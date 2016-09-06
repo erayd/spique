@@ -11,6 +11,7 @@ added and removed.
 
 ## API
 ```javascript
+var Spique = require('spique');
 var s = new Spique(maxItems, ringSize);
 ```
 `maxItems` sets the maximum number of items which may be stored in the queue at
