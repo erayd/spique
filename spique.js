@@ -52,7 +52,7 @@ function Spique(maxItems, circumference) {
         throw new Error('Buffer is full');
       // add another ring if necessary
       if(!firstRing.available()) {
-        newRing = new RingBuffer(circumference);
+        var newRing = new RingBuffer(circumference);
         newRing.nextRing = firstRing;
         firstRing.prevRing = newRing;
         firstRing = newRing;
