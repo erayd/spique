@@ -9,6 +9,11 @@ Spique does not require an initial or maximum size (although you can define a
 maximum if you wish), and will both grow and shrink dynamically as items are
 added and removed.
 
+Spique is available [via npm](https://www.npmjs.com/package/spique):
+```bash
+npm install spique
+```
+
 ## API
 ```javascript
 var Spique = require('spique');
