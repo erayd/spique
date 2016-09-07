@@ -134,15 +134,6 @@ function RingBuffer(size) {
   var items = 0;
   var buffer = new Array(size);
 
-  // mark the buffer as empty and optionally unset all the slots
-  this.empty = function(unset) {
-    head = 0;
-    if(unset) {
-      for(var i = size; i;)
-        delete buffer[--i];
-    }
-  }
-
   // check whether the buffer is empty
   this.isEmpty = function() {
     return !items;
