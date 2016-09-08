@@ -40,12 +40,15 @@ for(myValue of s) {
 
 ### .push(), .enqueue()
 ```javascript
-s.push(myValue);
-s.enqueue(myValue);
+s.push(myValue...);
+s.enqueue(myValue...);
 ```
 Append a value to the end of the queue. If a max queue size has been set, and the
 queue is full, then this method will throw an error. `enqueue()` and `push()` are
 synonymous.
+
+If more than one value is supplied, then they will all be added to the queue
+in the order that they are supplied.
 
 ### .shift(), .dequeue()
 ```javascript
@@ -58,10 +61,13 @@ synonymous.
 
 ### .unshift()
 ```javascript
-s.unshift(myValue);
+s.unshift(myValue...);
 ```
 Prepend a value to the head of the queue. If a max queue size has been set, and
 the queue is full, then this method will throw an error.
+
+If more than one value is supplied, then they will all be added to the queue
+in the order that they are supplied.
 
 ### .pop()
 ```javascript
