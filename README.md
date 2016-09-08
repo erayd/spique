@@ -3,7 +3,7 @@ Spique - A Spiral Double-Ended Queue
 
 Spique is a deque implemented as a doubly-linked list of circular buffers. This
 structure allows for both high performance and unlimited dynamic growth of the
-queue.
+queue. All operations are O(1) except the `.capacity` property, which is O(n).
 
 Spique does not require an initial or maximum size (although you can define a
 maximum if you wish), and will both grow and shrink dynamically as items are
