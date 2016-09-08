@@ -18,6 +18,8 @@ module.exports = Spique;
 function Spique(maxItems, circumference) {
   var defaultCircumference = 1000;
   circumference = circumference ? parseInt(circumference) : defaultCircumference;
+  if(!maxItems || !(typeof maxItems === 'number'))
+    maxItems = Math.floor(Number.MAX_VALUE);
 
   var firstRing = new RingBuffer(circumference);
   var lastRing = firstRing;
