@@ -106,10 +106,7 @@ function Spique(maxItems, circumference) {
 
   // get the number of items in the buffer
   Object.defineProperty(this, 'length', {get: function() {
-    var length = 0;
-    for(var r = firstRing; r; r = r.nextRing)
-      length += r.length;
-    return length;
+    return items;
   }});
 
   // get the current capacity
