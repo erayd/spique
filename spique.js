@@ -23,6 +23,7 @@ function Spique(maxItems, circumference) {
 
   var firstRing = new RingBuffer(circumference);
   var lastRing = firstRing;
+  var rings = 1;
   var items = 0;
 
   // check whether the buffer is empty
@@ -41,6 +42,7 @@ function Spique(maxItems, circumference) {
         lastRing.nextRing = newRing;
         newRing.prevRing = lastRing;
         lastRing = newRing;
+        rings++;
       }
       lastRing.push(value);
       items++;
@@ -58,6 +60,7 @@ function Spique(maxItems, circumference) {
         newRing.nextRing = firstRing;
         firstRing.prevRing = newRing;
         firstRing = newRing;
+        rings++;
       }
       firstRing.unshift(value);
       items++;
@@ -71,6 +74,7 @@ function Spique(maxItems, circumference) {
     if(lastRing.isEmpty() && lastRing.prevRing) {
       lastRing = lastRing.prevRing;
       delete lastRing.nextRing;
+      rings--;
     }
     items--;
     return value;
@@ -83,6 +87,7 @@ function Spique(maxItems, circumference) {
     if(firstRing.isEmpty() && firstRing.nextRing) {
       firstRing = firstRing.nextRing;
       delete firstRing.prevRing;
+      rings--;
     }
     items--;
     return value;
@@ -111,10 +116,7 @@ function Spique(maxItems, circumference) {
 
   // get the current capacity
   Object.defineProperty(this, 'capacity', {get: function() {
-    var capacity = 0;
-    for(var r = firstRing; r; r = r.nextRing)
-      capacity += circumference;
-    return capacity;
+    return rings * circumference;
   }});
 
   // get the max number of items
