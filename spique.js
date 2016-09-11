@@ -15,13 +15,13 @@
 
 module.exports = Spique;
 
-function Spique(maxItems, circumference) {
-  var defaultCircumference = 1000;
-  circumference = circumference ? parseInt(circumference) : defaultCircumference;
+function Spique(maxItems, ringSize) {
+  var defaultRingSize = 1000;
+  ringSize = ringSize ? parseInt(ringSize) : defaultRingSize;
   if(!maxItems || !(typeof maxItems === 'number'))
     maxItems = Math.floor(Number.MAX_VALUE);
 
-  var firstRing = new RingBuffer(circumference);
+  var firstRing = new RingBuffer(ringSize);
   var lastRing = firstRing;
   var rings = 1;
   var items = 0;
@@ -38,7 +38,7 @@ function Spique(maxItems, circumference) {
         return new Error('Buffer is full');
       // add another ring if necessary
       if(!lastRing.available()) {
-        var newRing = new RingBuffer(circumference);
+        var newRing = new RingBuffer(ringSize);
         lastRing.nextRing = newRing;
         newRing.prevRing = lastRing;
         lastRing = newRing;
@@ -56,7 +56,7 @@ function Spique(maxItems, circumference) {
         return new Error('Buffer is full');
       // add another ring if necessary
       if(!firstRing.available()) {
-        var newRing = new RingBuffer(circumference);
+        var newRing = new RingBuffer(ringSize);
         newRing.nextRing = firstRing;
         firstRing.prevRing = newRing;
         firstRing = newRing;
@@ -116,7 +116,7 @@ function Spique(maxItems, circumference) {
 
   // get the current capacity
   Object.defineProperty(this, 'capacity', {get: function() {
-    return rings * circumference;
+    return rings * ringSize;
   }});
 
   // get the max number of items
@@ -126,7 +126,7 @@ function Spique(maxItems, circumference) {
 
   // get the ring size
   Object.defineProperty(this, 'ringSize', {get: function() {
-    return circumference;
+    return ringSize;
   }});
 }
 
