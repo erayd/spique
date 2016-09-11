@@ -94,12 +94,12 @@ function Spique(maxItems, circumference) {
   };
 
   // peek at the end of the buffer
-  this.peek = function() {
+  this.last = this.peek = function() {
     return lastRing.peek();
   };
 
   // peek at the start of the buffer
-  this.peekStart = function() {
+  this.first = this.peekStart = function() {
     return firstRing.peekStart();
   };
 

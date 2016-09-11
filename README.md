@@ -76,19 +76,22 @@ var myValue = s.pop();
 Return the value at the end of the queue, and remove it from the queue. If the
 queue is empty, then this method will return undefined.
 
-### .peek()
+### .last(), .peek()
 ```javascript
+var myValue = s.last();
 var myValue = s.peek();
 ```
 Return the value at the end of the queue. The value is not removed. If the queue
-is empty, then this method will return undefined.
+is empty, then this method will return undefined. `last()` and `peek()` are synonymous.
 
-### .peekStart()
+### .first(), .peekStart()
 ```javascript
+var myValue = s.first();
 var myValue = s.peekStart();
 ```
 Return the value at the head of the queue. The value is not removed. If the queue
-is empty, then this method will return undefined.
+is empty, then this method will return undefined. `first()` and `peekStart()` are
+synonymous.
 
 ### Properties
 #### .length
