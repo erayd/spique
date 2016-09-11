@@ -20,7 +20,7 @@ var Spique = require('spique');
 var s = new Spique(maxItems, ringSize);
 ```
 `maxItems` sets the maximum number of items which may be stored in the queue at
-any given time. Attempting to store more items than this will throw an error. If
+any given time. Attempting to store more items than this will return an error. If
 maxItems is falsy, then there is no maximum, and the queue may continue to grow
 as long as there is available memory. By default, `maxItems` is unlimited.
 
@@ -44,7 +44,7 @@ s.push(myValue...);
 s.enqueue(myValue...);
 ```
 Append a value to the end of the queue. If a max queue size has been set, and the
-queue is full, then this method will throw an error. `enqueue()` and `push()` are
+queue is full, then this method will return an error. `enqueue()` and `push()` are
 synonymous.
 
 If more than one value is supplied, then they will all be added to the queue
@@ -56,7 +56,7 @@ var myValue = s.shift();
 var myValue = s.dequeue();
 ```
 Return the value at the head of the queue, and remove it from the queue. If the
-queue is empty, this method will throw an error. `dequeue()` and `shift()` are
+queue is empty, this method will return undefined. `dequeue()` and `shift()` are
 synonymous.
 
 ### .unshift()
@@ -64,7 +64,7 @@ synonymous.
 s.unshift(myValue...);
 ```
 Prepend a value to the head of the queue. If a max queue size has been set, and
-the queue is full, then this method will throw an error.
+the queue is full, then this method will return an error.
 
 If more than one value is supplied, then they will all be added to the queue
 in the order that they are supplied.
@@ -74,21 +74,21 @@ in the order that they are supplied.
 var myValue = s.pop();
 ```
 Return the value at the end of the queue, and remove it from the queue. If the
-queue is empty, then this method will throw an error.
+queue is empty, then this method will return undefined.
 
 ### .peek()
 ```javascript
 var myValue = s.peek();
 ```
 Return the value at the end of the queue. The value is not removed. If the queue
-is empty, then this method will throw an error.
+is empty, then this method will return undefined.
 
 ### .peekStart()
 ```javascript
 var myValue = s.peekStart();
 ```
 Return the value at the head of the queue. The value is not removed. If the queue
-is empty, then this method will throw an error.
+is empty, then this method will return undefined.
 
 ### Properties
 #### .length

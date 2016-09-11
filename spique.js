@@ -35,7 +35,7 @@ function Spique(maxItems, circumference) {
   this.enqueue = this.push = function() {
     for(value of arguments) {
       if(items >= maxItems)
-        throw new Error('Buffer is full');
+        return new Error('Buffer is full');
       // add another ring if necessary
       if(!lastRing.available()) {
         var newRing = new RingBuffer(circumference);
@@ -53,7 +53,7 @@ function Spique(maxItems, circumference) {
   this.unshift = function(value) {
     for(value of arguments) {
       if(items >= maxItems)
-        throw new Error('Buffer is full');
+        return new Error('Buffer is full');
       // add another ring if necessary
       if(!firstRing.available()) {
         var newRing = new RingBuffer(circumference);
@@ -161,7 +161,7 @@ function RingBuffer(size) {
   // pop an item off the end of the buffer
   this.pop = function() {
     if(this.isEmpty())
-      throw new Error('Buffer is empty');
+      return undefined;
     var pos = (head + --items) % size;
     var value = buffer[pos];
     delete buffer[pos];
@@ -171,7 +171,7 @@ function RingBuffer(size) {
   // pop an item off the start of the buffer
   this.shift = function() {
     if(this.isEmpty())
-      throw new Error('Buffer is empty');
+      return undefined;
     var value = buffer[head];
     delete buffer[head];
     if(++head == size)
@@ -183,14 +183,14 @@ function RingBuffer(size) {
   // peek at the end of the buffer
   this.peek = function() {
     if(this.isEmpty())
-      throw new Error('Buffer is empty');
+      return undefined;
     return buffer[(head + (items - 1)) % size];
   };
 
   // peek at the start of the buffer
   this.peekStart = function() {
     if(this.isEmpty())
-      throw new Error('Buffer is empty');
+      return undefined;
     return buffer[head];
   };
 
