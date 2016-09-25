@@ -17,7 +17,8 @@
     "deque",
     "dequeue",
     "ring",
-    "ringbuffer"
+    "ringbuffer",
+    "data structures"
   ],
   "author": "Erayd <steve@erayd.net>",
   "license": "ISC",
