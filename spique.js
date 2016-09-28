@@ -21,10 +21,21 @@ function Spique(maxItems, ringSize) {
   if(!maxItems || !(typeof maxItems === 'number'))
     maxItems = Math.floor(Number.MAX_VALUE);
 
-  var firstRing = new RingBuffer(ringSize);
+  var firstRing = allocateRing();
   var lastRing = firstRing;
+  var spareRing = undefined;
   var rings = 1;
   var items = 0;
+
+  // allocate a new ring, or return the spare if available
+  function allocateRing() {
+    var newRing = spareRing;
+    if(newRing !== undefined)
+      spareRing = undefined;
+    else
+      newRing = new RingBuffer(ringSize);
+    return newRing;
+  }
 
   // check whether the buffer is empty
   this.isEmpty = function() {
@@ -38,7 +49,7 @@ function Spique(maxItems, ringSize) {
         return new Error('Buffer is full');
       // add another ring if necessary
       if(!lastRing.available()) {
-        var newRing = new RingBuffer(ringSize);
+        var newRing = allocateRing();
         lastRing.nextRing = newRing;
         newRing.prevRing = lastRing;
         lastRing = newRing;
@@ -56,7 +67,7 @@ function Spique(maxItems, ringSize) {
         return new Error('Buffer is full');
       // add another ring if necessary
       if(!firstRing.available()) {
-        var newRing = new RingBuffer(ringSize);
+        var newRing = allocateRing();
         newRing.nextRing = firstRing;
         firstRing.prevRing = newRing;
         firstRing = newRing;
@@ -73,6 +84,7 @@ function Spique(maxItems, ringSize) {
     // delete the ring if it's empty and not the last one
     if(lastRing.isEmpty() && lastRing.prevRing) {
       lastRing = lastRing.prevRing;
+      spareRing = lastRing.nextRing;
       delete lastRing.nextRing;
       rings--;
     }
@@ -86,6 +98,7 @@ function Spique(maxItems, ringSize) {
     // delete the ring if it's empty and not the last one
     if(firstRing.isEmpty() && firstRing.nextRing) {
       firstRing = firstRing.nextRing;
+      spareRing = firstRing.prevRing;
       delete firstRing.prevRing;
       rings--;
     }
