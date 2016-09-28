@@ -164,7 +164,7 @@ function RingBuffer(size) {
       return undefined;
     var pos = (head + --items) % size;
     var value = buffer[pos];
-    delete buffer[pos];
+    buffer[pos] = undefined;
     return value;
   };
 
@@ -173,7 +173,7 @@ function RingBuffer(size) {
     if(this.isEmpty())
       return undefined;
     var value = buffer[head];
-    delete buffer[head];
+    buffer[head] = undefined;
     if(++head == size)
       head = 0;
     items--;
