@@ -1,9 +1,9 @@
 Spique - A Spiral Double-Ended Queue
 ====================================
 
-Spique is a deque implemented as a doubly-linked list of circular buffers. This
-structure allows for both high performance and unlimited dynamic growth of the
-queue. All operations are O(1) (constant time).
+Spique is an extremely fast deque implemented as a doubly-linked list of circular
+buffers. This structure allows for both high performance and unlimited dynamic
+growth of the queue. All operations are O(1) (constant time).
 
 Spique does not require an initial or maximum size (although you can define a
 maximum if you wish), and will both grow and shrink dynamically as items are
@@ -37,6 +37,16 @@ for(myValue of s) {
   doSomething(myValue);
 }
 ```
+
+### A Note On Performance
+The higher the number of items per ring, the faster Spique will run. In most cases,
+this doesn't matter, and you can just use the default ring size - this is more than
+fast enough for most scenarios, and any performance gain will be negligible.
+
+However, if you are using Spique in a situation where it needs to handle a very high
+flow rate (e.g. many millions of items per second), it's advisable to increase the
+ring size accordingly. If it's not essential to wring every last possible scrap of
+performance out of your hardware, this advice may be freely ignored.
 
 ### .push(), .enqueue()
 ```javascript
