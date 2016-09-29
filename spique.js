@@ -45,38 +45,46 @@ function Spique(maxItems, ringSize) {
   };
 
   // push item(s) onto the end of the buffer
-  this.enqueue = this.push = function() {
-    for(var value of arguments) {
-      if(items >= maxItems)
+  this.enqueue = this.push = function push(value) {
+    if(items >= maxItems)
+      return new Error('Buffer is full');
+    // add another ring if necessary
+    if(!lastRing.available()) {
+      var newRing = allocateRing();
+      lastRing.nextRing = newRing;
+      newRing.prevRing = lastRing;
+      lastRing = newRing;
+      rings++;
+    }
+    lastRing.push(value);
+    items++;
+
+    // process variadic args
+    for(var argIndex = 1; argIndex < arguments.length; argIndex++) {
+      if(push(arguments[argIndex]))
         return new Error('Buffer is full');
-      // add another ring if necessary
-      if(!lastRing.available()) {
-        var newRing = allocateRing();
-        lastRing.nextRing = newRing;
-        newRing.prevRing = lastRing;
-        lastRing = newRing;
-        rings++;
-      }
-      lastRing.push(value);
-      items++;
     }
   }
 
   // push item(s) onto the start of the buffer
-  this.unshift = function(value) {
-    for(var value of arguments) {
-      if(items >= maxItems)
+  this.unshift = function unshift(value) {
+    if(items >= maxItems)
+      return new Error('Buffer is full');
+    // add another ring if necessary
+    if(!firstRing.available()) {
+      var newRing = allocateRing();
+      newRing.nextRing = firstRing;
+      firstRing.prevRing = newRing;
+      firstRing = newRing;
+      rings++;
+    }
+    firstRing.unshift(value);
+    items++;
+
+    // process variadic args
+    for(var argIndex = 1; argIndex < arguments.length; argIndex++) {
+      if(unshift(arguments[argIndex]))
         return new Error('Buffer is full');
-      // add another ring if necessary
-      if(!firstRing.available()) {
-        var newRing = allocateRing();
-        newRing.nextRing = firstRing;
-        firstRing.prevRing = newRing;
-        firstRing = newRing;
-        rings++;
-      }
-      firstRing.unshift(value);
-      items++;
     }
   }
 
