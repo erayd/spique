@@ -162,15 +162,23 @@ function RingBuffer(size) {
 
   // push item onto the end of the buffer
   this.push = function(value) {
-    var pos = (head + items++) % size;
-    buffer[pos] = value;
+    if(items < size) {
+      var pos = (head + items++) % size;
+      buffer[pos] = value;
+    }
+    else
+      return new Error('Buffer is full');
   };
 
   // push item onto the start of the buffer
   this.unshift = function(value) {
-    var pos = head ? --head : (head = size - 1);
-    buffer[pos] = value;
-    items++;
+    if(items < size) {
+      var pos = head ? --head : (head = size - 1);
+      buffer[pos] = value;
+      items++;
+    }
+    else
+      return new Error('Buffer is full');
   };
 
   // pop an item off the end of the buffer
