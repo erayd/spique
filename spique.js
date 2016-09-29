@@ -13,6 +13,7 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+"use strict";
 module.exports = Spique;
 
 function Spique(maxItems, ringSize) {
@@ -44,7 +45,7 @@ function Spique(maxItems, ringSize) {
 
   // push item(s) onto the end of the buffer
   this.enqueue = this.push = function() {
-    for(value of arguments) {
+    for(var value of arguments) {
       if(items >= maxItems)
         return new Error('Buffer is full');
       // add another ring if necessary
@@ -62,7 +63,7 @@ function Spique(maxItems, ringSize) {
 
   // push item(s) onto the start of the buffer
   this.unshift = function(value) {
-    for(value of arguments) {
+    for(var value of arguments) {
       if(items >= maxItems)
         return new Error('Buffer is full');
       // add another ring if necessary
