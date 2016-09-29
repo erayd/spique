@@ -15,6 +15,7 @@
 
 "use strict";
 module.exports = Spique;
+module.exports.RingBuffer = RingBuffer;
 
 function Spique(maxItems, ringSize) {
   var defaultRingSize = 1000;
