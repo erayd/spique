@@ -7,7 +7,9 @@ growth of the queue. All operations are O(1) (constant time).
 
 Spique does not require an initial or maximum size (although you can define a
 maximum if you wish), and will both grow and shrink dynamically as items are
-added and removed.
+added and removed. Unlike many other deque implementations, dynamic resizing
+is an extremely cheap O(1) operation, and will not have any notable impact on
+performance.
 
 Spique is available [via npm](https://www.npmjs.com/package/spique):
 ```bash
