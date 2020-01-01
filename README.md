@@ -93,6 +93,14 @@ Return the value at the head of the queue. The value is not removed. If the queu
 is empty, then this method will return undefined. `first()` and `peekStart()` are
 synonymous.
 
+### .isEmpty()
+```javascript
+if (s.isEmpty()) {
+    // the queue is empty
+}
+```
+Check whether the queue is currently empty.
+
 ### Properties
 #### .length
 The number of items currently stored in the queue.

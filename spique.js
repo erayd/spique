@@ -44,7 +44,7 @@ module.exports = class Spique extends events.EventEmitter {
 
     // check whether the buffer is empty
     this.isEmpty = function() {
-      return firstRing == lastRing && firstRing.isEmpty();
+      return !items;
     };
 
     // push item(s) onto the end of the buffer
