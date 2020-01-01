@@ -47,6 +47,11 @@ module.exports = class Spique extends events.EventEmitter {
       return !items;
     };
 
+    // check whether the buffer is full
+    this.isFull = function() {
+      return items == maxItems;
+    }
+
     // push item(s) onto the end of the buffer
     this.enqueue = this.push = function push(value) {
       if(items >= maxItems)

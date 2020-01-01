@@ -101,6 +101,14 @@ if (s.isEmpty()) {
 ```
 Check whether the queue is currently empty.
 
+### .isFull()
+```javascript
+if (s.isFull()) {
+    // the queue is full
+}
+```
+Check whether the queue is currently empty.
+
 ### Properties
 #### .length
 The number of items currently stored in the queue.
