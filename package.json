@@ -1,6 +1,6 @@
 {
   "name": "spique",
-  "version": "1.0.8",
+  "version": "2.0.0",
   "description": "A spiral deque - high performance and dynamic queue size",
   "main": "spique.js",
   "scripts": {
@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/erayd/spique/issues"
   },
-  "homepage": "https://github.com/erayd/spique#readme"
+  "homepage": "https://github.com/erayd/spique#readme",
+  "dependencies": {
+    "events": "^3.0.0"
+  }
 }

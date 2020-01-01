@@ -107,3 +107,13 @@ unlimited, then maxItems will be zero.
 #### .ringSize
 The size of each circular buffer. The queue will grow / shrink by this many items
 at a time.
+
+### Events
+#### ready
+The queue has one or more items stored in it.
+
+#### full
+The queue is full.
+
+#### empty
+The queue is empty.
