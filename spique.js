@@ -31,6 +31,7 @@ module.exports = class Spique extends events.EventEmitter {
     var spareRing = undefined;
     var rings = 1;
     var items = 0;
+    var pending = new Spique();
 
     // allocate a new ring, or return the spare if available
     function allocateRing() {
@@ -80,6 +81,17 @@ module.exports = class Spique extends events.EventEmitter {
       }
     }
 
+    // push item(s) onto the end of the buffer when there is space available
+    this.enqueueAsync = this.pushAsync = function pushAsync(value) {
+      if (!this.isFull()) {
+        return Promise.resolve(this.push(value));
+      } else {
+        pending.push(() => {
+          return Promise.resolve(this.push(value));
+        });
+      }
+    }
+
     // push item(s) onto the start of the buffer
     this.unshift = function unshift(value) {
       if(items >= maxItems)
@@ -108,6 +120,17 @@ module.exports = class Spique extends events.EventEmitter {
       }
     }
 
+    // push item(s) onto the start of the buffer when there is space available
+    this.unshiftAsync = function unshiftAsync(value) {
+      if (!this.isFull()) {
+        return Promise.resolve(this.unshift(value));
+      } else {
+        pending.push(() => {
+          return Promise.resolve(this.unshift(value));
+        });
+      }
+    }
+
     // pop an item off the end of the buffer
     this.pop = function() {
       var value = lastRing.pop();
@@ -121,8 +144,12 @@ module.exports = class Spique extends events.EventEmitter {
       items--;
       if (items === 0)
         this.emit("empty", this);
-      if (items < maxItems)
-        this.emit("space", this);
+      if (items < maxItems) {
+        while (!this.isFull() && !pending.isEmpty())
+          this.pending.shift()();
+        if (items < maxItems)
+          this.emit("space", this);
+      }
       return value;
     };
 
@@ -139,8 +166,12 @@ module.exports = class Spique extends events.EventEmitter {
       items--;
       if (items === 0)
         this.emit("empty", this);
-      if (items < maxItems)
-        this.emit("space", this);
+      if (items < maxItems) {
+        while (!this.isFull() && !pending.isEmpty())
+          this.pending.shift()();
+        if (items < maxItems)
+          this.emit("space", this);
+      }
       return value;
     };
 

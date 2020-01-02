@@ -50,6 +50,16 @@ synonymous.
 If more than one value is supplied, then they will all be added to the queue
 in the order that they are supplied.
 
+### .pushAsync(), .enqueueAsync()
+```javascript
+  for (let item of items) {
+    await s.pushAsync(item);
+  }
+```
+Asynchronous version of `push()` / `enqueue()`, returning a `Promise`. Allows
+for backpressure and feeding the queue at the same rate items are removed from
+it.
+
 ### .shift(), .dequeue()
 ```javascript
 var myValue = s.shift();
@@ -68,6 +78,16 @@ the queue is full, then this method will return an error.
 
 If more than one value is supplied, then they will all be added to the queue
 in the order that they are supplied.
+
+### .unshiftAsync()
+```javascript
+  for (let item of items) {
+    await s.unshiftAsync(item);
+  }
+```
+Asynchronous version of `unshift()`, returning a `Promise`. Allows
+for backpressure and feeding the queue at the same rate items are removed from
+it.
 
 ### .pop()
 ```javascript
