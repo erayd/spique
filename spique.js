@@ -120,7 +120,7 @@ module.exports = class Spique extends events.EventEmitter {
       }
       items--;
       if (items === 0)
-        this.emit("empty");
+        this.emit("empty", this);
       return value;
     };
 
@@ -136,7 +136,7 @@ module.exports = class Spique extends events.EventEmitter {
       }
       items--;
       if (items === 0)
-        this.emit("empty");
+        this.emit("empty", this);
       return value;
     };
 
