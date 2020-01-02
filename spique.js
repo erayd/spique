@@ -147,8 +147,8 @@ module.exports = class Spique extends events.EventEmitter {
       if (items === 0)
         this.emit("empty", this);
       if (items < maxItems) {
-        while (!this.isFull() && !pending.isEmpty())
-          this.pending.shift()();
+        while (pending && !this.isFull() && !pending.isEmpty())
+          pending.shift()();
         if (items < maxItems)
           this.emit("space", this);
       }
@@ -171,8 +171,8 @@ module.exports = class Spique extends events.EventEmitter {
       if (items === 0)
         this.emit("empty", this);
       if (items < maxItems) {
-        while (!this.isFull() && !pending.isEmpty())
-          this.pending.shift()();
+        while (pending && !this.isFull() && !pending.isEmpty())
+          pending.shift()();
         if (items < maxItems)
           this.emit("space", this);
       }
