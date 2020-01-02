@@ -133,6 +133,8 @@ module.exports = class Spique extends events.EventEmitter {
 
     // pop an item off the end of the buffer
     this.pop = function() {
+      if (lastRing.isEmpty())
+        return undefined;
       var value = lastRing.pop();
       // delete the ring if it's empty and not the last one
       if(lastRing.isEmpty() && lastRing.prevRing) {
@@ -155,6 +157,8 @@ module.exports = class Spique extends events.EventEmitter {
 
     // pop an item off the start of the buffer
     this.dequeue = this.shift = function() {
+      if (firstRing.isEmpty())
+        return undefined;
       var value = firstRing.shift();
       // delete the ring if it's empty and not the last one
       if(firstRing.isEmpty() && firstRing.nextRing) {
