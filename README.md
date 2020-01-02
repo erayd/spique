@@ -133,3 +133,6 @@ The queue is full.
 
 #### empty
 The queue is empty.
+
+#### space
+The queue has space available to store more items.

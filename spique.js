@@ -121,6 +121,8 @@ module.exports = class Spique extends events.EventEmitter {
       items--;
       if (items === 0)
         this.emit("empty", this);
+      if (items < maxItems)
+        this.emit("space", this);
       return value;
     };
 
@@ -137,6 +139,8 @@ module.exports = class Spique extends events.EventEmitter {
       items--;
       if (items === 0)
         this.emit("empty", this);
+      if (items < maxItems)
+        this.emit("space", this);
       return value;
     };
 

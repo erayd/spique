@@ -73,6 +73,8 @@ module.exports = class Ringbuffer extends events.EventEmitter {
       buffer[pos] = undefined;
       if (this.isEmpty())
         this.emit("empty", this);
+      if (items < size)
+        this.emit("space", this);
       return value;
     };
 
@@ -87,6 +89,8 @@ module.exports = class Ringbuffer extends events.EventEmitter {
       items--;
       if (this.isEmpty())
         this.emit("empty", this);
+      if (items < size)
+        this.emit("space", this);
       return value;
     };
 
