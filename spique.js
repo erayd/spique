@@ -19,7 +19,7 @@ const events = require("events");
 const RingBuffer = require("./ringbuffer.js");
 
 module.exports = class Spique extends events.EventEmitter {
-  constructor(maxItems, ringSize) {
+  constructor(maxItems, ringSize, _async = true) {
     super();
     var defaultRingSize = 1000;
     ringSize = ringSize ? parseInt(ringSize) : defaultRingSize;
@@ -31,7 +31,7 @@ module.exports = class Spique extends events.EventEmitter {
     var spareRing = undefined;
     var rings = 1;
     var items = 0;
-    var pending = new Spique();
+    var pending = _async ? new Spique(null, null, false) : null;
 
     // allocate a new ring, or return the spare if available
     function allocateRing() {
