@@ -32,6 +32,7 @@ module.exports = class Spique extends events.EventEmitter {
     var rings = 1;
     var items = 0;
     var pending = _async ? new Spique(null, null, false) : null;
+    var closed = false;
 
     // allocate a new ring, or return the spare if available
     function allocateRing() {
@@ -41,6 +42,11 @@ module.exports = class Spique extends events.EventEmitter {
       else
         newRing = new RingBuffer(ringSize);
       return newRing;
+    }
+
+    // mark the queue as closed
+    this.close = function() {
+      this.closed = true;
     }
 
     // check whether the buffer is empty
@@ -149,9 +155,11 @@ module.exports = class Spique extends events.EventEmitter {
       if (items < maxItems) {
         while (pending && !this.isFull() && !pending.isEmpty())
           pending.shift()();
-        if (items < maxItems)
+        if (items < maxItems && !closed)
           this.emit("space", this);
       }
+      if (this.items === 0)
+        this.emit("close", this);
       return value;
     };
 
@@ -173,9 +181,11 @@ module.exports = class Spique extends events.EventEmitter {
       if (items < maxItems) {
         while (pending && !this.isFull() && !pending.isEmpty())
           pending.shift()();
-        if (items < maxItems)
+        if (items < maxItems && !closed)
           this.emit("space", this);
       }
+      if (this.items === 0)
+        this.emit("close", this);
       return value;
     };
 

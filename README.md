@@ -113,6 +113,17 @@ Return the value at the head of the queue. The value is not removed. If the queu
 is empty, then this method will return undefined. `first()` and `peekStart()` are
 synonymous.
 
+### .close()
+```javascript
+s.on("close", queue => {
+  // there are no items remaining and the queue is closed
+});
+s.close();
+```
+Mark the queue as closed. A closed queue will never emit a `space` event, and will
+emit a `close` event once the queue is completely empty and all pending items have
+been processed.
+
 ### .isEmpty()
 ```javascript
 if (s.isEmpty()) {
@@ -153,6 +164,9 @@ The queue is full.
 
 #### empty
 The queue is empty.
+
+#### close
+The queue is empty, there are no pending items, and the queue is marked as closed.
 
 #### space
 The queue has space available to store more items.
