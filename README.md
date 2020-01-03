@@ -124,6 +124,16 @@ Mark the queue as closed. A closed queue will never emit a `space` event, and wi
 emit a `close` event once the queue is completely empty and all pending items have
 been processed.
 
+### .isClosed()
+```javascript
+if (s.isClosed()) {
+    // the queue is marked as closed
+}
+```
+Check whether the queue is marked as closed. Note that this does _not_ mean that
+the queue is empty. When the queue is both closed _and_ empty, then a `close` event
+will be emitted.
+
 ### .isEmpty()
 ```javascript
 if (s.isEmpty()) {

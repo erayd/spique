@@ -44,12 +44,17 @@ module.exports = class Spique extends events.EventEmitter {
       return newRing;
     }
 
-    // mark the queue as closed
+    // mark the buffer as closed
     this.close = function() {
       this.closed = true;
       if (this.isEmpty()) {
         this.emit("close", this);
       }
+    }
+    
+    // check whether the buffer is closed
+    this.isClosed = function() {
+      return this.closed;
     }
 
     // check whether the buffer is empty
