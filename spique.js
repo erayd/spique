@@ -47,6 +47,9 @@ module.exports = class Spique extends events.EventEmitter {
     // mark the queue as closed
     this.close = function() {
       this.closed = true;
+      if (this.isEmpty()) {
+        this.emit("close", this);
+      }
     }
 
     // check whether the buffer is empty
