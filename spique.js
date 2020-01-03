@@ -46,9 +46,11 @@ module.exports = class Spique extends events.EventEmitter {
 
     // mark the buffer as closed
     this.close = function() {
-      this.closed = true;
-      if (this.isEmpty()) {
-        this.emit("close", this);
+      if (!this.closed) {
+        this.closed = true;
+        if (this.isEmpty()) {
+          this.emit("close", this);
+        }
       }
     }
     
