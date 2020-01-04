@@ -113,16 +113,24 @@ Return the value at the head of the queue. The value is not removed. If the queu
 is empty, then this method will return undefined. `first()` and `peekStart()` are
 synonymous.
 
-### .close()
+### .close([ttl = 0])
 ```javascript
 s.on("close", queue => {
   // there are no items remaining and the queue is closed
 });
-s.close();
+s.close(); // close immediately
+s.close(500); // close once 500 items have been inserted
 ```
 Mark the queue as closed. A closed queue will never emit a `space` event, and will
 emit a `close` event once the queue is completely empty and all pending items have
 been processed.
+
+If a TTL parameter is provided, then the queue will automatically close once the
+total number of inserted items during the life of the queue reaches the ttl. The
+queue will also emit `ttl-in` and `ttl-out` events.
+
+Please note that items cannot be inserted into a closed queue, including pending
+asynchronous inserts. Any inserts pending at the time the queue closes will fail.
 
 ### .isClosed()
 ```javascript
@@ -172,6 +180,9 @@ asynchronous inserts).
 #### .lifetimeOut
 The total number of items that have ever been removed.
 
+#### .ttl
+The queue TTL. Zero if there is no TTL set.
+
 ### Events
 #### ready
 The queue has one or more items stored in it.
@@ -183,7 +194,13 @@ The queue is full.
 The queue is empty.
 
 #### close
-The queue is empty, there are no pending items, and the queue is marked as closed.
+The queue is empty, and the queue is marked as closed.
+
+#### ttl-in
+The total number of inserted items has reached the TTL.
+
+#### ttl-out
+The total number of removed items has reached the TTL.
 
 #### space
 The queue has space available to store more items.

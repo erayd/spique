@@ -33,6 +33,7 @@ module.exports = class Spique extends events.EventEmitter {
     var items = 0;
     var lifetimeIn = 0;
     var lifetimeOut = 0;
+    var ttl = 0;
     var pending = _async ? new Spique(null, null, false) : null;
     var closed = false;
 
@@ -47,18 +48,31 @@ module.exports = class Spique extends events.EventEmitter {
     }
 
     // mark the buffer as closed
-    this.close = function() {
-      if (!this.closed) {
-        this.closed = true;
-        if (this.isEmpty()) {
-          this.emit("close", this);
+    this.close = function(newTTL = 0) {
+      if (newTTL) {
+        ttl = newTTL;
+        if (ttl < lifetimeIn) {
+          throw new Error("Attempted to set TTL lower than lifetime inserts");
+        } else {
+          if (ttl === lifetimeIn) {
+            this.emit("ttl-in", this);
+            this.close();
+          }
+          if (ttl === lifetimeOut) {
+            this.emit("ttl-out", this);
+          }
         }
+      } else if (!closed) {
+        closed = true;
+      }
+      if (closed && this.isEmpty()) {
+        this.emit("close", this);
       }
     }
     
     // check whether the buffer is closed
     this.isClosed = function() {
-      return this.closed;
+      return closed;
     }
 
     // check whether the buffer is empty
@@ -73,6 +87,8 @@ module.exports = class Spique extends events.EventEmitter {
 
     // push item(s) onto the end of the buffer
     this.enqueue = this.push = function push(value) {
+      if (closed)
+        throw new Error('Buffer is closed');
       if(items >= maxItems)
         throw new Error('Buffer is full');
       // add another ring if necessary
@@ -85,7 +101,12 @@ module.exports = class Spique extends events.EventEmitter {
       }
       lastRing.push(value);
       items++;
-      lifetimeIn++;
+
+      // ttl & lifetime counters
+      if (ttl && ttl === ++lifetimeIn) {
+        this.emit("ttl-in", this);
+        this.close();
+      }
 
       // fire events
       if(items === 1)
@@ -106,13 +127,18 @@ module.exports = class Spique extends events.EventEmitter {
         return Promise.resolve(this.push(value));
       } else {
         pending.push(() => {
-          return Promise.resolve(this.push(value));
+          if (closed)
+            return Promise.reject(new Error('Buffer is closed'));
+          else
+            return Promise.resolve(this.push(value));
         });
       }
     }
 
     // push item(s) onto the start of the buffer
     this.unshift = function unshift(value) {
+      if (closed)
+        throw new Error('Buffer is closed');
       if(items >= maxItems)
         throw new Error('Buffer is full');
       // add another ring if necessary
@@ -125,7 +151,12 @@ module.exports = class Spique extends events.EventEmitter {
       }
       firstRing.unshift(value);
       items++;
-      lifetimeIn++;
+
+      // ttl & lifetime counters
+      if (ttl && ttl === ++lifetimeIn) {
+        this.emit("ttl-in", this);
+        this.close();
+      }
 
       // fire events
       if(items === 1)
@@ -146,7 +177,10 @@ module.exports = class Spique extends events.EventEmitter {
         return Promise.resolve(this.unshift(value));
       } else {
         pending.push(() => {
-          return Promise.resolve(this.unshift(value));
+          if (closed)
+            return Promise.reject(new Error('Buffer is closed'));
+          else
+            return Promise.resolve(this.unshift(value));
         });
       }
     }
@@ -164,9 +198,18 @@ module.exports = class Spique extends events.EventEmitter {
         rings--;
       }
       items--;
-      lifetimeOut++;
-      if (items === 0)
+
+      // ttl & lifetime counters
+      if (ttl && ttl === ++lifetimeOut) {
+        this.emit("ttl-out", this);
+      }
+
+      if (items === 0) {
         this.emit("empty", this);
+        if (closed) {
+          this.emit("close", this);
+        }
+      }
       if (items < maxItems) {
         while (pending && !this.isFull() && !pending.isEmpty())
           pending.shift()();
@@ -191,9 +234,18 @@ module.exports = class Spique extends events.EventEmitter {
         rings--;
       }
       items--;
-      lifetimeOut++;
-      if (items === 0)
+
+      // ttl & lifetime counters
+      if (ttl && ttl === ++lifetimeOut) {
+        this.emit("ttl-out", this);
+      }
+
+      if (items === 0) {
         this.emit("empty", this);
+        if (closed) {
+          this.emit("close", this);
+        }
+      }
       if (items < maxItems) {
         while (pending && !this.isFull() && !pending.isEmpty())
           pending.shift()();
@@ -249,6 +301,11 @@ module.exports = class Spique extends events.EventEmitter {
     // get lifetime removes
     Object.defineProperty(this, 'lifetimeOut', {get: function() {
       return lifetimeOut;
+    }});
+
+    // get ttl
+    Object.defineProperty(this, 'ttl', {get: function() {
+      return ttl;
     }});
   }
 }
