@@ -31,6 +31,8 @@ module.exports = class Spique extends events.EventEmitter {
     var spareRing = undefined;
     var rings = 1;
     var items = 0;
+    var lifetimeIn = 0;
+    var lifetimeOut = 0;
     var pending = _async ? new Spique(null, null, false) : null;
     var closed = false;
 
@@ -83,6 +85,7 @@ module.exports = class Spique extends events.EventEmitter {
       }
       lastRing.push(value);
       items++;
+      lifetimeIn++;
 
       // fire events
       if(items === 1)
@@ -122,6 +125,7 @@ module.exports = class Spique extends events.EventEmitter {
       }
       firstRing.unshift(value);
       items++;
+      lifetimeIn++;
 
       // fire events
       if(items === 1)
@@ -160,6 +164,7 @@ module.exports = class Spique extends events.EventEmitter {
         rings--;
       }
       items--;
+      lifetimeOut++;
       if (items === 0)
         this.emit("empty", this);
       if (items < maxItems) {
@@ -186,6 +191,7 @@ module.exports = class Spique extends events.EventEmitter {
         rings--;
       }
       items--;
+      lifetimeOut++;
       if (items === 0)
         this.emit("empty", this);
       if (items < maxItems) {
@@ -233,6 +239,16 @@ module.exports = class Spique extends events.EventEmitter {
     // get the ring size
     Object.defineProperty(this, 'ringSize', {get: function() {
       return ringSize;
+    }});
+
+    // get lifetime inserts
+    Object.defineProperty(this, 'lifetimeIn', {get: function() {
+      return lifetimeIn;
+    }});
+
+    // get lifetime removes
+    Object.defineProperty(this, 'lifetimeOut', {get: function() {
+      return lifetimeOut;
     }});
   }
 }

@@ -165,6 +165,13 @@ unlimited, then maxItems will be zero.
 The size of each circular buffer. The queue will grow / shrink by this many items
 at a time.
 
+#### .lifetimeIn
+The total number of items that have ever been inserted (exluding pending
+asynchronous inserts).
+
+#### .lifetimeOut
+The total number of items that have ever been removed.
+
 ### Events
 #### ready
 The queue has one or more items stored in it.
