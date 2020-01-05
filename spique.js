@@ -38,6 +38,21 @@ module.exports = class Spique extends events.EventEmitter {
     var pending = _async ? new Spique(null, null, false) : null;
     var closed = false;
 
+    // fill from provided iterables
+    var fillFrom = _async ? new Spique(null, null, false) : null;
+    var doFillFrom = () => {
+      if (fillFrom) {
+        while (!fillFrom.isEmpty() && !this.isFull()) {
+          let v = fillFrom.first().source.next();
+          if (v.done) {
+            fillFrom.dequeue();
+          } else {
+            this[fillFrom.first().unshift ? "unshift" : "enqueue"](v.value);
+          }
+        }
+      }
+    }
+
     // immediately call newly attached event handlers if appropriate
     this.on("newListener", (ev, listener) => {
       if (
@@ -218,6 +233,10 @@ module.exports = class Spique extends events.EventEmitter {
         this.emit("ttl-out", this);
       }
 
+      // autofill
+      doFillFrom();
+
+      // events
       if (items === 0) {
         this.emit("empty", this);
         if (closed) {
@@ -255,6 +274,10 @@ module.exports = class Spique extends events.EventEmitter {
         this.emit("ttl-out", this);
       }
 
+      // autofill
+      doFillFrom();
+
+      // events
       if (items === 0) {
         this.emit("empty", this);
         if (closed) {
@@ -281,6 +304,12 @@ module.exports = class Spique extends events.EventEmitter {
     // peek at the start of the buffer
     this.first = this.peekStart = function() {
       return firstRing.peekStart();
+    };
+
+    // fill from a provided iterator or generator
+    this.fillFrom = function (source, unshift = false) {
+      fillFrom.enqueue({source, unshift});
+      doFillFrom();
     };
 
     // apply a transform function and return a new queue of transformed items

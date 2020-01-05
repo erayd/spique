@@ -172,6 +172,19 @@ then items will be removed using `pop()` and added to the result queue using
 Any remaining parameters will be passed directly to the constructor for the result
 queue.
 
+### .fillFrom(source, [unshift = false])
+```javascript
+let source = (function*() {
+  yield 1;
+  yield 2;
+  yield 3;
+})();
+
+s.fillFrom(source);
+```
+Fill the queue as needed from the provided source. The source must be a live instance
+of a generator or iterator.
+
 ### Properties
 #### .length
 The number of items currently stored in the queue.
