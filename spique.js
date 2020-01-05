@@ -292,30 +292,29 @@ module.exports = class Spique extends events.EventEmitter {
           yield item;
         };
       }
-      let results = function*(){}();
 
+      let results = function*(){}();
       let feed = () => {
         while (!dest.isFull()) {
           let next = results.next();
-          if (next.done && !this.isEmpty()) {
-            results = transform(reverse ? this.pop() : this.dequeue());
-            next = results.next();
-          }
           if (next.done) {
-            break;
+            if (!this.isEmpty()) {
+              results = transform(reverse ? this.pop() : this.dequeue());
+              continue;
+            } else {
+              break;
+            }
           }
           dest[reverse ? "unshift" : "enqueue"](next.value);
         }
-        if (!dest.isFull()) {
-          dest.removeListener("space", feed);
-          this.once("ready", () => {
-            feed();
-            dest.on("space", feed);
-          });
+        if (dest.isFull()) {
+          dest.once("space", feed);
+        } else {
+          this.once("ready", feed);
         }
-      }
+      };
 
-      dest.on("space", feed);
+      dest.once("space", feed);
 
       return dest;
     }
