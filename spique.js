@@ -257,6 +257,13 @@ module.exports = class Spique extends events.EventEmitter {
       return value;
     };
 
+    // start processing
+    this.start = function() {
+      if (!this.isClosed()) {
+        this.emit("space", this);
+      }
+    };
+
     // peek at the end of the buffer
     this.last = this.peek = function() {
       return lastRing.peek();
