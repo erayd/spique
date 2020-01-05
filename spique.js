@@ -290,8 +290,9 @@ module.exports = class Spique extends events.EventEmitter {
       this.on("close", () => close = true);
 
       if (!(transform instanceof GeneratorFunction)) {
+        let plainTransform = transform;
         transform = function*(item) {
-          yield item;
+          yield plainTransform(item);
         };
       }
 
