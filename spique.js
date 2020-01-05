@@ -100,7 +100,7 @@ module.exports = class Spique extends events.EventEmitter {
     }
 
     // push item(s) onto the end of the buffer
-    this.enqueue = this.push = function push(value) {
+    this.enqueue = this.push = function push(...values) {
       if (closed)
         throw new Error('Buffer is closed');
       if(items >= maxItems)
@@ -113,25 +113,24 @@ module.exports = class Spique extends events.EventEmitter {
         lastRing = newRing;
         rings++;
       }
-      lastRing.push(value);
+      lastRing.push(values.shift());
       items++;
 
       // ttl & lifetime counters
       if (ttl && ttl === ++lifetimeIn) {
-        this.emit("ttl-in", this);
         this.close();
+        this.emit("ttl-in", this);
       }
 
-      // fire events
-      if(items === 1)
-        this.emit("ready", this);
-      if(items === maxItems)
-        this.emit("full", this);
-
-      // process variadic args
-      for(var argIndex = 1; argIndex < arguments.length; argIndex++) {
-        if(push(arguments[argIndex]))
-          throw new Error('Buffer is full');
+      if (values.length) {
+        // unroll variadic args
+        push(...values);
+      } else {
+        // fire post-insert events
+        if(items === 1)
+          this.emit("ready", this);
+        if(items === maxItems)
+          this.emit("full", this);
       }
     }
 
@@ -150,7 +149,7 @@ module.exports = class Spique extends events.EventEmitter {
     }
 
     // push item(s) onto the start of the buffer
-    this.unshift = function unshift(value) {
+    this.unshift = function unshift(...values) {
       if (closed)
         throw new Error('Buffer is closed');
       if(items >= maxItems)
@@ -163,25 +162,24 @@ module.exports = class Spique extends events.EventEmitter {
         firstRing = newRing;
         rings++;
       }
-      firstRing.unshift(value);
+      firstRing.unshift(values.shift());
       items++;
 
       // ttl & lifetime counters
       if (ttl && ttl === ++lifetimeIn) {
-        this.emit("ttl-in", this);
         this.close();
+        this.emit("ttl-in", this);
       }
 
-      // fire events
-      if(items === 1)
-        this.emit("ready", this);
-      if(items === maxItems)
-        this.emit("full", this);
-
-      // process variadic args
-      for(var argIndex = 1; argIndex < arguments.length; argIndex++) {
-        if(unshift(arguments[argIndex]))
-          throw new Error('Buffer is full');
+      if (values.length) {
+        // unroll variadic args
+        unshift(...values);
+      } else {
+      // fire post-insert events
+        if(items === 1)
+          this.emit("ready", this);
+        if(items === maxItems)
+          this.emit("full", this);
       }
     }
 
