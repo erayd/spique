@@ -158,6 +158,18 @@ if (s.isFull()) {
 ```
 Check whether the queue is currently empty.
 
+### .apply(transform, [reverse = false, [...constructorParams]])
+Apply a transform function to all items traversing the queue, and return another
+queue containing the results.
+
+By default, items will be removed from the start of the queue (`dequeue()`) and
+added to the end of the result queue (`enqueue()`). However, if `reverse` is true,
+then items will be removed using `pop()` and added to the result queue using
+`unshift()`.
+
+Any remaining parameters will be passed directly to the constructor for the result
+queue.
+
 ### Properties
 #### .length
 The number of items currently stored in the queue.

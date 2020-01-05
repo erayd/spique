@@ -280,6 +280,32 @@ module.exports = class Spique extends events.EventEmitter {
       return firstRing.peekStart();
     };
 
+    // apply a transform function and return a new queue of transformed items
+    this.apply = function(transform, reverse = false, ...createParams) {
+      let dest = new Spique(...createParams);
+      let close = false;
+      this.on("close", () => close = true);
+
+      dest.on("space", dest => {
+        while (!dest.isFull() && !this.isEmpty()) {
+          if (reverse) {
+            dest.unshift(transform(this.pop()));
+          } else {
+            dest.enqueue(transform(this.dequeue()));
+          }
+        }
+        if (!dest.isFull()) {
+          if (close) {
+            dest.close();
+          } else {
+            this.once("ready", src => dest.emit("space", dest));
+          }
+        }
+      });
+
+      return dest;
+    }
+
     // iterator dequeue
     this[Symbol.iterator] = function*() {
       while(!this.isEmpty())
