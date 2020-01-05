@@ -191,6 +191,11 @@ The total number of items that have ever been removed.
 The queue TTL. Zero if there is no TTL set.
 
 ### Events
+Event handlers will be called immediately upon attachment if the queue is
+currently in a state where entering that state would have emitted the target
+event. For example, if the queue contains one or more items, and a listener
+is attached for the `ready` event, it will be called immediately.
+
 #### ready
 The queue has one or more items stored in it.
 

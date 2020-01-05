@@ -37,6 +37,19 @@ module.exports = class Spique extends events.EventEmitter {
     var pending = _async ? new Spique(null, null, false) : null;
     var closed = false;
 
+    // immediately call newly attached event handlers if appropriate
+    this.on("newListener", (ev, listener) => {
+      if (
+        (ev === "ready" && !this.isEmpty()) ||
+        (ev === "full" && this.isFull()) ||
+        (ev === "empty" && this.isEmpty()) ||
+        (ev === "space" && !this.isFull()) ||
+        (ev === "close" && this.isClosed() && this.isEmpty()) ||
+        (ev === "ttl-in" && ttl && lifetimeIn === ttl) ||
+        (ev === "ttl-out" && ttl && lifetimeOut === ttl)
+      ) { listener(this); }
+    });
+
     // allocate a new ring, or return the spare if available
     function allocateRing() {
       var newRing = spareRing;
