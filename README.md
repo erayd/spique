@@ -158,13 +158,6 @@ if (s.isFull()) {
 ```
 Check whether the queue is currently empty.
 
-### .start()
-```
-// attach handlers etc. to the queue
-s.start(); // start processing
-```
-Provided the queue isn't closed, emit a `space` event to start processing.
-
 ### Properties
 #### .length
 The number of items currently stored in the queue.
