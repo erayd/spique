@@ -232,6 +232,7 @@ module.exports = class Spique extends events.EventEmitter {
       }
       if (this.items === 0)
         this.emit("close", this);
+
       return value;
     };
 
@@ -268,6 +269,7 @@ module.exports = class Spique extends events.EventEmitter {
       }
       if (this.items === 0)
         this.emit("close", this);
+
       return value;
     };
 
