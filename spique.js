@@ -17,6 +17,7 @@
 "use strict";
 const events = require("events");
 const RingBuffer = require("./ringbuffer.js");
+const GeneratorFunction = function*(){}.constructor;
 
 module.exports = class Spique extends events.EventEmitter {
   constructor(maxItems, ringSize, _async = true) {
@@ -286,22 +287,35 @@ module.exports = class Spique extends events.EventEmitter {
       let close = false;
       this.on("close", () => close = true);
 
-      dest.on("space", dest => {
-        while (!dest.isFull() && !this.isEmpty()) {
-          if (reverse) {
-            dest.unshift(transform(this.pop()));
-          } else {
-            dest.enqueue(transform(this.dequeue()));
+      if (!(transform instanceof GeneratorFunction)) {
+        transform = function*(item) {
+          yield item;
+        };
+      }
+      let results = function*(){}();
+
+      let feed = () => {
+        while (!dest.isFull()) {
+          let next = results.next();
+          if (next.done && !this.isEmpty()) {
+            results = transform(reverse ? this.pop() : this.dequeue());
+            next = results.next();
           }
+          if (next.done) {
+            break;
+          }
+          dest[reverse ? "unshift" : "enqueue"](next.value);
         }
         if (!dest.isFull()) {
-          if (close) {
-            dest.close();
-          } else {
-            this.once("ready", src => dest.emit("space", dest));
-          }
+          dest.removeListener("space", feed);
+          this.once("ready", () => {
+            feed();
+            dest.on("space", feed);
+          });
         }
-      });
+      }
+
+      dest.on("space", feed);
 
       return dest;
     }

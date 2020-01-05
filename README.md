@@ -160,7 +160,9 @@ Check whether the queue is currently empty.
 
 ### .apply(transform, [reverse = false, [...constructorParams]])
 Apply a transform function to all items traversing the queue, and return another
-queue containing the results.
+queue containing the results. The transform function may be either a regular function,
+or a generator (e.g. if the transformation does not result in exactly one output item
+for each input).
 
 By default, items will be removed from the start of the queue (`dequeue()`) and
 added to the end of the result queue (`enqueue()`). However, if `reverse` is true,
