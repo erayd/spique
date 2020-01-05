@@ -100,7 +100,7 @@ module.exports = class Spique extends events.EventEmitter {
     }
 
     // push item(s) onto the end of the buffer
-    this.enqueue = this.push = function push(...values) {
+    this.enqueue = this.push = (...values) => {
       if (closed)
         throw new Error('Buffer is closed');
       if(items >= maxItems)
@@ -114,7 +114,7 @@ module.exports = class Spique extends events.EventEmitter {
         rings++;
       }
       lastRing.push(values.shift());
-      items++;
+      let ready = !items++;
 
       // ttl & lifetime counters
       if (ttl && ttl === ++lifetimeIn) {
@@ -124,13 +124,14 @@ module.exports = class Spique extends events.EventEmitter {
 
       if (values.length) {
         // unroll variadic args
-        push(...values);
+        this.push(...values);
       } else {
         // fire post-insert events
-        if(items === 1)
-          this.emit("ready", this);
         if(items === maxItems)
           this.emit("full", this);
+      }
+      if (ready) {
+        this.emit("ready", this);
       }
     }
 
@@ -149,7 +150,7 @@ module.exports = class Spique extends events.EventEmitter {
     }
 
     // push item(s) onto the start of the buffer
-    this.unshift = function unshift(...values) {
+    this.unshift = (...values) => {
       if (closed)
         throw new Error('Buffer is closed');
       if(items >= maxItems)
@@ -163,7 +164,7 @@ module.exports = class Spique extends events.EventEmitter {
         rings++;
       }
       firstRing.unshift(values.shift());
-      items++;
+      let ready = !items++;
 
       // ttl & lifetime counters
       if (ttl && ttl === ++lifetimeIn) {
@@ -173,13 +174,14 @@ module.exports = class Spique extends events.EventEmitter {
 
       if (values.length) {
         // unroll variadic args
-        unshift(...values);
+        this.unshift(...values);
       } else {
       // fire post-insert events
-        if(items === 1)
-          this.emit("ready", this);
         if(items === maxItems)
           this.emit("full", this);
+      }
+      if(ready) {
+        this.emit("ready", this);
       }
     }
 
