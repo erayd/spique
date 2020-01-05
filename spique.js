@@ -341,6 +341,8 @@ module.exports = class Spique extends events.EventEmitter {
         }
         if (dest.isFull()) {
           dest.once("space", feed);
+        } else if (close) {
+          dest.close();
         } else {
           this.once("ready", feed);
         }
