@@ -274,6 +274,8 @@ module.exports = class Spique extends events.EventEmitter {
     this.start = function() {
       if (!this.isClosed()) {
         this.emit("space", this);
+      } else {
+        throw new Error("Cannot start a closed queue");
       }
     };
 
