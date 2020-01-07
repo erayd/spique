@@ -36,11 +36,6 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             free: { get: () => size - items, enumerable: true }
         });
 
-        // check whether the buffer is empty
-        this.isEmpty = function() {
-            return !items;
-        };
-
         // push item onto the end of the buffer
         this.push = function(value) {
             if (items < size) {
