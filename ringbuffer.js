@@ -46,31 +46,35 @@ module.exports = class Ringbuffer extends events.EventEmitter {
 
         // push item onto the end of the buffer
         function push(value) {
-            if (items < size) {
-                var pos = (head + items++) % size;
-                buffer[pos] = value;
-                if (items === 1) this.emit("data", this);
-                if (items === size) this.emit("full", this);
-            } else throw new Error("Buffer is full");
+            if (items === size) throw new Error("Buffer is full");
+
+            var pos = (head + items++) % size;
+            buffer[pos] = value;
+
+            if (items === 1) this.emit("data", this);
+            if (items === size) this.emit("full", this);
         };
 
         // push item onto the start of the buffer
         function unshift(value) {
-            if (items < size) {
-                var pos = head ? --head : (head = size - 1);
-                buffer[pos] = value;
-                items++;
-                if (items === 1) this.emit("data", this);
-                if (items === size) this.emit("full", this);
-            } else throw new Error("Buffer is full");
+            if (items === size) throw new Error("Buffer is full");
+
+            var pos = head ? --head : (head = size - 1);
+            buffer[pos] = value;
+            items++;
+
+            if (items === 1) this.emit("data", this);
+            if (items === size) this.emit("full", this);
         };
 
         // pop an item off the end of the buffer
        function pop() {
             if (!items) throw new Error("No items in buffer");
+
             var pos = (head + --items) % size;
             var value = buffer[pos];
             buffer[pos] = undefined;
+
             if (!items) this.emit("empty", this);
             if (items < size) this.emit("free", this);
             return value;
@@ -79,10 +83,12 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         // pop an item off the start of the buffer
         function shift() {
             if (!items) throw new Error("No items in buffer");
+
             var value = buffer[head];
             buffer[head] = undefined;
             if (++head == size) head = 0;
             items--;
+
             if (!items) this.emit("empty", this);
             if (items < size) this.emit("free", this);
             return value;
@@ -91,12 +97,14 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         // peek at the end of the buffer
         function peek() {
             if (!items) throw new Error("No items in buffer");
+
             return buffer[(head + (items - 1)) % size];
         };
 
         // peek at the start of the buffer
         function peekStart() {
             if (!items) throw new Error("No items in buffer");
+
             return buffer[head];
         };
     }
