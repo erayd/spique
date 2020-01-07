@@ -33,11 +33,19 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             length: { get: () => items, enumerable: true },
 
             // get the current number of free slots in the buffer
-            free: { get: () => size - items, enumerable: true }
+            free: { get: () => size - items, enumerable: true },
+
+            // methods
+            push: { value: push, writable: false },
+            unshift: { value: unshift, writable: false },
+            pop: { value: pop, writable: false },
+            shift: { value: shift, writable: false },
+            peek: { value: peek, writable: false },
+            peekStart: { value: peekStart, writable: false }
         });
 
         // push item onto the end of the buffer
-        this.push = function(value) {
+        function push(value) {
             if (items < size) {
                 var pos = (head + items++) % size;
                 buffer[pos] = value;
@@ -47,7 +55,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         };
 
         // push item onto the start of the buffer
-        this.unshift = function(value) {
+        function unshift(value) {
             if (items < size) {
                 var pos = head ? --head : (head = size - 1);
                 buffer[pos] = value;
@@ -58,7 +66,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         };
 
         // pop an item off the end of the buffer
-        this.pop = function() {
+       function pop() {
             if (!items) throw new Error("No items in buffer");
             var pos = (head + --items) % size;
             var value = buffer[pos];
@@ -69,7 +77,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         };
 
         // pop an item off the start of the buffer
-        this.shift = function() {
+        function shift() {
             if (!items) throw new Error("No items in buffer");
             var value = buffer[head];
             buffer[head] = undefined;
@@ -81,13 +89,13 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         };
 
         // peek at the end of the buffer
-        this.peek = function() {
+        function peek() {
             if (!items) throw new Error("No items in buffer");
             return buffer[(head + (items - 1)) % size];
         };
 
         // peek at the start of the buffer
-        this.peekStart = function() {
+        function peekStart() {
             if (!items) throw new Error("No items in buffer");
             return buffer[head];
         };
