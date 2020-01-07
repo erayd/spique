@@ -121,7 +121,7 @@ module.exports = class Spique extends events.EventEmitter {
       if(items >= maxItems)
         throw new Error('Buffer is full');
       // add another ring if necessary
-      if(!lastRing.available()) {
+      if(!lastRing.free) {
         var newRing = allocateRing();
         lastRing.nextRing = newRing;
         newRing.prevRing = lastRing;
@@ -171,7 +171,7 @@ module.exports = class Spique extends events.EventEmitter {
       if(items >= maxItems)
         throw new Error('Buffer is full');
       // add another ring if necessary
-      if(!firstRing.available()) {
+      if(!firstRing.free) {
         var newRing = allocateRing();
         newRing.nextRing = firstRing;
         firstRing.prevRing = newRing;

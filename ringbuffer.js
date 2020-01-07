@@ -24,14 +24,21 @@ module.exports = class Ringbuffer extends events.EventEmitter {
         var items = 0;
         var buffer = new Array(size);
 
+        // basic properties
+        Object.defineProperties(this, {
+            // get the size of the buffer
+            size: { value: size, writable: false, enumerable: true },
+
+            // get the current number of items in the buffer
+            length: { get: () => items, enumerable: true },
+
+            // get the current number of free slots in the buffer
+            free: { get: () => size - items, enumerable: true }
+        });
+
         // check whether the buffer is empty
         this.isEmpty = function() {
             return !items;
-        };
-
-        // get the number of free slots
-        this.available = function() {
-            return size - items;
         };
 
         // push item onto the end of the buffer
@@ -57,44 +64,37 @@ module.exports = class Ringbuffer extends events.EventEmitter {
 
         // pop an item off the end of the buffer
         this.pop = function() {
-            if (this.isEmpty()) return undefined;
+            if (!items) throw new Error("No items in buffer");
             var pos = (head + --items) % size;
             var value = buffer[pos];
             buffer[pos] = undefined;
-            if (this.isEmpty()) this.emit("empty", this);
+            if (!items) this.emit("empty", this);
             if (items < size) this.emit("space", this);
             return value;
         };
 
         // pop an item off the start of the buffer
         this.shift = function() {
-            if (this.isEmpty()) return undefined;
+            if (!items) throw new Error("No items in buffer");
             var value = buffer[head];
             buffer[head] = undefined;
             if (++head == size) head = 0;
             items--;
-            if (this.isEmpty()) this.emit("empty", this);
+            if (!items) this.emit("empty", this);
             if (items < size) this.emit("space", this);
             return value;
         };
 
         // peek at the end of the buffer
         this.peek = function() {
-            if (this.isEmpty()) return undefined;
+            if (!items) throw new Error("No items in buffer");
             return buffer[(head + (items - 1)) % size];
         };
 
         // peek at the start of the buffer
         this.peekStart = function() {
-            if (this.isEmpty()) return undefined;
+            if (!items) throw new Error("No items in buffer");
             return buffer[head];
         };
-
-        // get the number of items in the buffer
-        Object.defineProperty(this, "length", {
-            get: function() {
-                return items;
-            }
-        });
     }
 };
