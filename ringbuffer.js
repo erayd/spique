@@ -46,7 +46,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             if (items < size) {
                 var pos = (head + items++) % size;
                 buffer[pos] = value;
-                if (items === 1) this.emit("ready", this);
+                if (items === 1) this.emit("data", this);
                 if (items === size) this.emit("full", this);
             } else throw new Error("Buffer is full");
         };
@@ -57,7 +57,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
                 var pos = head ? --head : (head = size - 1);
                 buffer[pos] = value;
                 items++;
-                if (items === 1) this.emit("ready", this);
+                if (items === 1) this.emit("data", this);
                 if (items === size) this.emit("full", this);
             } else throw new Error("Buffer is full");
         };
@@ -69,7 +69,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             var value = buffer[pos];
             buffer[pos] = undefined;
             if (!items) this.emit("empty", this);
-            if (items < size) this.emit("space", this);
+            if (items < size) this.emit("free", this);
             return value;
         };
 
@@ -81,7 +81,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             if (++head == size) head = 0;
             items--;
             if (!items) this.emit("empty", this);
-            if (items < size) this.emit("space", this);
+            if (items < size) this.emit("free", this);
             return value;
         };
 
