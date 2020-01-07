@@ -48,7 +48,15 @@ module.exports = class Spique extends EventEmitter {
             dequeue: { value: dequeue, writable: false },
             dequeueTail: { value: dequeueTail, writable: false },
             peek: { value: peek, writable: false },
-            peekTail: { value: peekTail, writable: false }
+            peekTail: { value: peekTail, writable: false },
+
+            // iterator
+            [Symbol.iterator]: {
+                value: function*() {
+                    while (items) yield this.dequeue();
+                },
+                writable: false
+            }
         });
 
         // call listener if event state is valid on attachment

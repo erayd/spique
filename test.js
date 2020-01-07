@@ -80,35 +80,39 @@ const Spique = require("./spique.js");
     let events = {
         full: [
             {
+                // forward
                 prepare: s => s.enqueue(1),
                 reset: s => s.dequeue(),
                 then: s => s.enqueue(1)
             },
             {
+                // backward
                 prepare: s => s.enqueueHead(1),
                 reset: s => s.dequeueTail(),
                 then: s => s.enqueueHead(1)
             }
         ],
         empty: [
-            { reset: s => s.enqueue(1), then: s => s.dequeue() },
-            { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() }
+            { reset: s => s.enqueue(1), then: s => s.dequeue() }, //forward
+            { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() } //backward
         ],
         full: [
             {
+                // forward
                 prepare: s => s.enqueue(1),
                 reset: s => s.dequeue(),
                 then: s => s.enqueue(1)
             },
             {
+                // backward
                 prepare: s => s.enqueueHead(1),
                 reset: s => s.dequeueTail(),
                 then: s => s.enqueueHead(1)
             }
         ],
         free: [
-            { reset: s => s.enqueue(1), then: s => s.dequeue() },
-            { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() }
+            { reset: s => s.enqueue(1), then: s => s.dequeue() }, //forward
+            { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() } //backward
         ]
     };
 
@@ -130,6 +134,14 @@ const Spique = require("./spique.js");
     }
 }
 
+// iterator
+{
+    let s = new Spique();
+    for (let i = 0; i < 10; i++) s.enqueue(i);
+    let j = 0;
+    for (let i of s) assert(i === j++);
+}
+
 // memory
 {
     global.gc();
@@ -145,5 +157,5 @@ const Spique = require("./spique.js");
     let end = process.memoryUsage();
 
     assert(full.heapUsed < start.heapUsed + 12000000);
-    assert(end.heapUsed < start.heapUsed);
+    assert(end.heapUsed < start.heapUsed + 500000);
 }
