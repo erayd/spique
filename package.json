@@ -1,32 +1,32 @@
 {
-  "name": "spique",
-  "version": "2.8.2",
-  "description": "A spiral deque - high performance and dynamic queue size",
-  "main": "spique.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/erayd/spique.git"
-  },
-  "keywords": [
-    "queue",
-    "spiral",
-    "buffer",
-    "deque",
-    "dequeue",
-    "ring",
-    "ringbuffer",
-    "data structures"
-  ],
-  "author": "Erayd <steve@erayd.net>",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/erayd/spique/issues"
-  },
-  "homepage": "https://github.com/erayd/spique#readme",
-  "dependencies": {
-    "events": "^3.0.0"
-  }
+    "name": "spique",
+    "version": "2.8.2",
+    "description": "A spiral deque - high performance and dynamic queue size",
+    "main": "spique.js",
+    "scripts": {
+        "test": "./test.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/erayd/spique.git"
+    },
+    "keywords": [
+        "queue",
+        "spiral",
+        "buffer",
+        "deque",
+        "dequeue",
+        "ring",
+        "ringbuffer",
+        "data structures"
+    ],
+    "author": "Erayd <steve@erayd.net>",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/erayd/spique/issues"
+    },
+    "homepage": "https://github.com/erayd/spique#readme",
+    "dependencies": {
+        "events": "^3.0.0"
+    }
 }
