@@ -53,7 +53,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
 
             if (items === 1) this.emit("data", this);
             if (items === size) this.emit("full", this);
-        };
+        }
 
         // push item onto the start of the buffer
         function unshift(value) {
@@ -65,10 +65,10 @@ module.exports = class Ringbuffer extends events.EventEmitter {
 
             if (items === 1) this.emit("data", this);
             if (items === size) this.emit("full", this);
-        };
+        }
 
         // pop an item off the end of the buffer
-       function pop() {
+        function pop() {
             if (!items) throw new Error("No items in buffer");
 
             var pos = (head + --items) % size;
@@ -78,7 +78,7 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             if (!items) this.emit("empty", this);
             if (items < size) this.emit("free", this);
             return value;
-        };
+        }
 
         // pop an item off the start of the buffer
         function shift() {
@@ -92,20 +92,20 @@ module.exports = class Ringbuffer extends events.EventEmitter {
             if (!items) this.emit("empty", this);
             if (items < size) this.emit("free", this);
             return value;
-        };
+        }
 
         // peek at the end of the buffer
         function peek() {
             if (!items) throw new Error("No items in buffer");
 
             return buffer[(head + (items - 1)) % size];
-        };
+        }
 
         // peek at the start of the buffer
         function peekStart() {
             if (!items) throw new Error("No items in buffer");
 
             return buffer[head];
-        };
+        }
     }
 };
