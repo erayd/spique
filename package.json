@@ -1,6 +1,6 @@
 {
     "name": "spique",
-    "version": "2.8.2",
+    "version": "3.0.0",
     "description": "A spiral deque - high performance and dynamic queue size",
     "main": "spique.js",
     "scripts": {
@@ -18,7 +18,9 @@
         "dequeue",
         "ring",
         "ringbuffer",
-        "data structures"
+        "data structures",
+        "pipeline",
+        "pipe"
     ],
     "author": "Erayd <steve@erayd.net>",
     "license": "ISC",
