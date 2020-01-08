@@ -71,8 +71,34 @@ module.exports = class Spique extends EventEmitter {
             }
         });
 
+        // attach chained source (iterator | generator | Spique)
+        function attachSource(source, forward = true) {
+            let insert = forward ? "enqueue" : "enqueueHead";
+            if (source instanceof Spique) {
+                source.on("data", s => this[insert](s[Symbol.iterator](), true));
+                return;
+            } else if (Symbol.iterator in source) source = source[Symbol.iterator]();
+            let feed = target => {
+                while (target.free) {
+                    let next = source.next();
+                    if (next.done) {
+                        target.removeListener("free", feed);
+                        break;
+                    } else target[insert](next.value);
+                }
+            };
+            this.on("free", feed);
+        }
+
         // add an item to the tail of the queue
-        function enqueue(value) {
+        function enqueue(value, isSource = false) {
+            // attach source
+            if (isSource) {
+                attachSource.call(this, value, true);
+                return;
+            }
+
+            // check available space
             if (!this.free) throw new Error("Queue is full");
 
             // allocate a new ring
@@ -94,7 +120,14 @@ module.exports = class Spique extends EventEmitter {
         }
 
         // add an item to the head of the queue
-        function enqueueHead(value) {
+        function enqueueHead(value, isSource) {
+            // attach source
+            if (isSource) {
+                attachSource.call(this, value, false);
+                return;
+            }
+
+            // check available space
             if (!this.free) throw new Error("Queue is full");
 
             // allocate a new ring

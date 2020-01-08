@@ -2,6 +2,7 @@
 "use strict";
 
 const assert = require("assert");
+const events = require("events");
 const Spique = require("./spique.js");
 
 // create (defaults)
@@ -136,11 +137,52 @@ const Spique = require("./spique.js");
 
 // iterator
 {
-    let s = new Spique();
+    // iterate out
+    let s = new Spique(10);
     for (let i = 0; i < 10; i++) s.enqueue(i);
     let j = 0;
     for (let i of s) assert(i === j++);
+    assert(s.length === 0);
+
+    // iterate in
+    function* source(start = 0, count = 20) {
+        for (let i = start; i < start + count; i++) yield i;
+    }
+    s.enqueue(source(0), true);
+    s.enqueue(source(20), true);
+    assert(s.length === 10);
+    assert(s.peek() === 0);
+    assert(s.peekTail() === 9);
+    for (let i = 0; i < 10; i++) s.dequeue();
+    assert(s.length === 10);
+    assert(s.peek() === 10);
+    assert(s.peekTail() === 19);
+
+    // chain
+    let s2 = new Spique(10);
+    assert(s2.length === 0);
+    assert(events.EventEmitter.listenerCount(s2, "free") === 0);
+    s2.enqueue(s, true);
+    assert(events.EventEmitter.listenerCount(s2, "free") === 1);
+    assert(s.dequeue() === 20);
+    assert(s.length === 10);
+    assert(s2.length === 10);
+    assert(s2.dequeue() === 10);
+    assert(s.length === 10);
+    assert(s2.length === 10);
+    for(let noop of s2);
+    assert(events.EventEmitter.listenerCount(s2, "free") === 0);
+    s.enqueue(1);
+    assert(s2.dequeue() === 1);
+
+    // reverse
+    let s3 = new Spique();
+    s3.enqueueHead(s2, true);
+    for (let i = 0; i < 10; i++) s.enqueue(i);
+    assert(s3.dequeue() === 9);
+    assert(s3.dequeueTail() === 0);
 }
+
 
 // memory
 {
@@ -156,6 +198,6 @@ const Spique = require("./spique.js");
     global.gc();
     let end = process.memoryUsage();
 
-    assert(full.heapUsed < start.heapUsed + 12000000);
+    assert(full.heapUsed < start.heapUsed + 15000000);
     assert(end.heapUsed < start.heapUsed + 500000);
 }
