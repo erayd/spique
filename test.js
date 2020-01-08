@@ -233,21 +233,3 @@ const Spique = require("./spique.js");
     assert(s4.closed === true);
     assert(closed === true);
 }
-
-// memory
-{
-    global.gc();
-    let start = process.memoryUsage();
-
-    let s = new Spique();
-
-    for (let i = 0; i < 1000000; ++i) s.enqueue(i);
-    let full = process.memoryUsage();
-
-    for (let i = 0; i < 1000000; ++i) s.dequeue(i);
-    global.gc();
-    let end = process.memoryUsage();
-
-    assert(full.heapUsed < start.heapUsed + 15000000);
-    assert(end.heapUsed < start.heapUsed + 500000);
-}
