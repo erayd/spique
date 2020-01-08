@@ -98,7 +98,7 @@ const GeneratorFunction = function*() {}.prototype.constructor;
             { reset: s => s.enqueue(1), then: s => s.dequeue() }, //forward
             { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() } //backward
         ],
-        full: [
+        data: [
             {
                 // forward
                 prepare: s => s.enqueue(1),
