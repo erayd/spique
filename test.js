@@ -4,6 +4,7 @@
 const assert = require("assert");
 const events = require("events");
 const Spique = require("./spique.js");
+const GeneratorFunction = function*() {}.prototype.constructor;
 
 // create (defaults)
 {
@@ -114,7 +115,7 @@ const Spique = require("./spique.js");
         free: [
             { reset: s => s.enqueue(1), then: s => s.dequeue() }, //forward
             { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() } //backward
-        ],
+        ]
     };
 
     for (let ev in events) {
@@ -137,12 +138,12 @@ const Spique = require("./spique.js");
     // test close separately, as it's not resettable
     let closed = false;
     let s1 = new Spique();
-    s1.on("close", () => closed = true);
+    s1.on("close", () => (closed = true));
     assert(closed === false);
     s1.close();
     assert(closed === true);
     assert(s1.closed === true);
-    s1.on("close", () => closed = true);
+    s1.on("close", () => (closed = true));
     assert(closed === true);
 
     closed = false;
@@ -150,7 +151,7 @@ const Spique = require("./spique.js");
     s2.enqueue(1);
     s2.close();
     assert(s2.closed === false);
-    s2.on("close", () => closed = true);
+    s2.on("close", () => (closed = true));
     assert(s2.closed === false);
     s2.dequeue();
     assert(s2.closed === true);
@@ -161,7 +162,7 @@ const Spique = require("./spique.js");
     s3.enqueueHead(1);
     s3.close();
     assert(s3.closed === false);
-    s3.on("close", () => closed = true);
+    s3.on("close", () => (closed = true));
     assert(s3.closed === false);
     s3.dequeueTail();
     assert(s3.closed === true);
@@ -203,7 +204,7 @@ const Spique = require("./spique.js");
     assert(s2.dequeue() === 10);
     assert(s.length === 10);
     assert(s2.length === 10);
-    for(let noop of s2);
+    for (let noop of s2);
     assert(events.EventEmitter.listenerCount(s2, "free") === 0);
     s.enqueue(1);
     assert(s2.dequeue() === 1);
@@ -219,7 +220,7 @@ const Spique = require("./spique.js");
     let closed = false;
     s.close();
     let s4 = new Spique();
-    s4.on("close", () => closed = true);
+    s4.on("close", () => (closed = true));
     assert(closed === false);
     assert(closed === false);
     assert(s.closed === true);
@@ -232,4 +233,32 @@ const Spique = require("./spique.js");
     for (let noop of s4);
     assert(s4.closed === true);
     assert(closed === true);
+}
+
+// transforms
+{
+    let s = new Spique();
+
+    // plain functions
+    s.transform(value => value * value);
+    s.transform(value => value + 3);
+    s.enqueue(2);
+    assert(s.length === 1);
+    assert(s.dequeue() === 7);
+
+    // generators
+    s.transform(function*(n) {
+        while (n) yield n--;
+    });
+    s.enqueue(2);
+    assert(s.length === 7);
+    assert(s.dequeue() === 7);
+    assert(s.dequeueTail() === 1);
+    for (let noop of s);
+
+    // backwards
+    s.enqueueHead(2);
+    assert(s.length === 7);
+    assert(s.dequeue() === 1);
+    assert(s.dequeueTail() === 7);
 }

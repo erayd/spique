@@ -17,6 +17,7 @@
 "use strict";
 const EventEmitter = require("events").EventEmitter;
 const RingBuffer = require("./ringbuffer.js");
+const GeneratorFunction = Object.getPrototypeOf(function*() {});
 
 module.exports = class Spique extends EventEmitter {
     constructor(size = 0, ringSize = 1024) {
@@ -27,6 +28,7 @@ module.exports = class Spique extends EventEmitter {
         var rings = 1;
         var items = 0;
         var closed = false;
+        var transforms = [];
 
         // basic properties
         Object.defineProperties(this, {
@@ -55,6 +57,7 @@ module.exports = class Spique extends EventEmitter {
             dequeueTail: { value: dequeueTail, writable: false },
             peek: { value: peek, writable: false },
             peekTail: { value: peekTail, writable: false },
+            transform: { value: t => transforms.push(t), writable: false },
             close: { value: close, writable: false },
 
             // iterator
@@ -80,10 +83,12 @@ module.exports = class Spique extends EventEmitter {
         });
 
         // attach chained source (iterator | generator | Spique)
-        function attachSource(source, forward = true) {
+        function attachSource(source, forward = true, applyTransforms = true) {
             let insert = forward ? "enqueue" : "enqueueHead";
             if (source instanceof Spique) {
-                source.on("data", s => this[insert](s[Symbol.iterator](), true));
+                source.on("data", s => {
+                    this[insert](s[Symbol.iterator](), true, applyTransforms);
+                });
                 source.on("close", () => this.close());
                 return;
             } else if (Symbol.iterator in source) source = source[Symbol.iterator]();
@@ -93,10 +98,34 @@ module.exports = class Spique extends EventEmitter {
                     if (next.done) {
                         target.removeListener("free", feed);
                         break;
-                    } else target[insert](next.value);
+                    } else target[insert](next.value, false, applyTransforms);
                 }
             };
             this.on("free", feed);
+        }
+
+        // apply transforms & return a generator instance
+        function transform(value) {
+            let result = (function*() {
+                yield value;
+            })();
+
+            for (let transform of transforms) {
+                let input = result;
+                if (Object.getPrototypeOf(transform) === GeneratorFunction) {
+                    result = (function*() {
+                        for (let r of input) {
+                            for (let r2 of transform(r)) yield r2;
+                        }
+                    })();
+                } else {
+                    result = (function*() {
+                        for (let r of input) yield transform(r);
+                    })();
+                }
+            }
+
+            return result;
         }
 
         // close the queue
@@ -106,10 +135,16 @@ module.exports = class Spique extends EventEmitter {
         }
 
         // add an item to the tail of the queue
-        function enqueue(value, isSource = false) {
+        function enqueue(value, isSource = false, applyTransforms = true) {
             // attach source
             if (isSource) {
-                attachSource.call(this, value, true);
+                attachSource.call(this, value, true, applyTransforms);
+                return;
+            }
+
+            // apply transforms
+            if (applyTransforms && transforms.length) {
+                this.enqueue(transform.call(this, value), true, false);
                 return;
             }
 
@@ -138,10 +173,16 @@ module.exports = class Spique extends EventEmitter {
         }
 
         // add an item to the head of the queue
-        function enqueueHead(value, isSource) {
+        function enqueueHead(value, isSource = false, applyTransforms = true) {
             // attach source
             if (isSource) {
-                attachSource.call(this, value, false);
+                attachSource.call(this, value, false, applyTransforms);
+                return;
+            }
+
+            // apply transforms
+            if (applyTransforms && transforms.length) {
+                this.enqueueHead(transform.call(this, value), true, false);
                 return;
             }
 
