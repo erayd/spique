@@ -68,7 +68,7 @@ module.exports = class Spique extends EventEmitter {
                 (ev === "free" && this.free)
             ) {
                 listener(this);
-            } else throw new Error(`Invalid event: ${ev}`);
+            }
         });
 
         // add an item to the tail of the queue
