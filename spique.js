@@ -26,6 +26,7 @@ module.exports = class Spique extends EventEmitter {
         var tailRing = headRing;
         var rings = 1;
         var items = 0;
+        var closed = false;
 
         // basic properties
         Object.defineProperties(this, {
@@ -41,14 +42,20 @@ module.exports = class Spique extends EventEmitter {
                 enumerable: true
             },
 
-            // methods
+            // get the current closed status of the queue
+            closed: { get: () => closed && !items, enumerable: true },
+
+            // get the ring size
             ringSize: { value: ringSize, writable: false, enumerable: true },
+
+            // methods
             enqueue: { value: enqueue, writable: false },
             enqueueHead: { value: enqueueHead, writable: false },
             dequeue: { value: dequeue, writable: false },
             dequeueTail: { value: dequeueTail, writable: false },
             peek: { value: peek, writable: false },
             peekTail: { value: peekTail, writable: false },
+            close: { value: close, writable: false },
 
             // iterator
             [Symbol.iterator]: {
@@ -65,7 +72,8 @@ module.exports = class Spique extends EventEmitter {
                 (ev === "data" && items) ||
                 (ev === "empty" && !items) ||
                 (ev === "full" && !this.free) ||
-                (ev === "free" && this.free)
+                (ev === "free" && this.free) ||
+                (ev === "close" && this.closed)
             ) {
                 listener(this);
             }
@@ -76,6 +84,7 @@ module.exports = class Spique extends EventEmitter {
             let insert = forward ? "enqueue" : "enqueueHead";
             if (source instanceof Spique) {
                 source.on("data", s => this[insert](s[Symbol.iterator](), true));
+                source.on("close", () => this.close());
                 return;
             } else if (Symbol.iterator in source) source = source[Symbol.iterator]();
             let feed = target => {
@@ -90,6 +99,12 @@ module.exports = class Spique extends EventEmitter {
             this.on("free", feed);
         }
 
+        // close the queue
+        function close() {
+            closed = true;
+            if (!items) this.emit("close", this);
+        }
+
         // add an item to the tail of the queue
         function enqueue(value, isSource = false) {
             // attach source
@@ -97,6 +112,9 @@ module.exports = class Spique extends EventEmitter {
                 attachSource.call(this, value, true);
                 return;
             }
+
+            // check queue is open
+            if (this.closed) throw new Error("Queue is closed");
 
             // check available space
             if (!this.free) throw new Error("Queue is full");
@@ -126,6 +144,9 @@ module.exports = class Spique extends EventEmitter {
                 attachSource.call(this, value, false);
                 return;
             }
+
+            // check queue is open
+            if (this.closed) throw new Error("Queue is closed");
 
             // check available space
             if (!this.free) throw new Error("Queue is full");
@@ -177,8 +198,11 @@ module.exports = class Spique extends EventEmitter {
             }
 
             // fire events
-            if (!items) this.emit("empty", this);
-            if (this.free) this.emit("free", this);
+            if (!items) {
+                this.emit("empty", this);
+                if (closed) this.emit("close", this);
+            }
+            if (this.free && !closed) this.emit("free", this);
 
             return value;
         }
@@ -198,8 +222,11 @@ module.exports = class Spique extends EventEmitter {
             }
 
             // fire events
-            if (!items) this.emit("empty", this);
-            if (this.free) this.emit("free", this);
+            if (!items) {
+                this.emit("empty", this);
+                if (closed) this.emit("close", this);
+            }
+            if (this.free && !closed) this.emit("free", this);
 
             return value;
         }

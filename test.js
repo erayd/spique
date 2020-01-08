@@ -114,7 +114,7 @@ const Spique = require("./spique.js");
         free: [
             { reset: s => s.enqueue(1), then: s => s.dequeue() }, //forward
             { reset: s => s.enqueueHead(1), then: s => s.dequeueTail() } //backward
-        ]
+        ],
     };
 
     for (let ev in events) {
@@ -133,6 +133,39 @@ const Spique = require("./spique.js");
             assert(i === 2);
         }
     }
+
+    // test close separately, as it's not resettable
+    let closed = false;
+    let s1 = new Spique();
+    s1.on("close", () => closed = true);
+    assert(closed === false);
+    s1.close();
+    assert(closed === true);
+    assert(s1.closed === true);
+    s1.on("close", () => closed = true);
+    assert(closed === true);
+
+    closed = false;
+    let s2 = new Spique();
+    s2.enqueue(1);
+    s2.close();
+    assert(s2.closed === false);
+    s2.on("close", () => closed = true);
+    assert(s2.closed === false);
+    s2.dequeue();
+    assert(s2.closed === true);
+    assert(closed === true);
+
+    closed = false;
+    let s3 = new Spique();
+    s3.enqueueHead(1);
+    s3.close();
+    assert(s3.closed === false);
+    s3.on("close", () => closed = true);
+    assert(s3.closed === false);
+    s3.dequeueTail();
+    assert(s3.closed === true);
+    assert(closed === true);
 }
 
 // iterator & chaining
@@ -181,8 +214,25 @@ const Spique = require("./spique.js");
     for (let i = 0; i < 10; i++) s.enqueue(i);
     assert(s3.dequeue() === 9);
     assert(s3.dequeueTail() === 0);
-}
 
+    // close
+    let closed = false;
+    s.close();
+    let s4 = new Spique();
+    s4.on("close", () => closed = true);
+    assert(closed === false);
+    assert(closed === false);
+    assert(s.closed === true);
+    assert(s2.closed === true);
+    assert(s3.closed === false);
+    assert(s4.closed === false);
+    s4.enqueue(s3, true);
+    assert(s3.closed === true);
+    assert(s4.closed === false);
+    for (let noop of s4);
+    assert(s4.closed === true);
+    assert(closed === true);
+}
 
 // memory
 {
