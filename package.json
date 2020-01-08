@@ -1,6 +1,6 @@
 {
     "name": "spique",
-    "version": "3.0.3",
+    "version": "3.0.4",
     "description": "A spiral deque - high performance and dynamic queue size",
     "main": "spique.js",
     "scripts": {
