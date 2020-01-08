@@ -17,222 +17,153 @@ npm install spique
 ## API
 ```javascript
 var Spique = require('spique');
-var s = new Spique(maxItems, ringSize);
+var s = new Spique(size = 0, ringSize = 1024);
 ```
-`maxItems` sets the maximum number of items which may be stored in the queue at
+`size` sets the maximum number of items which may be stored in the queue at
 any given time. Attempting to store more items than this will return an error. If
-maxItems is falsy, then there is no maximum, and the queue may continue to grow
-as long as there is available memory. By default, `maxItems` is unlimited.
+`size` is zero, then there is no maximum, and the queue may continue to grow
+as long as there is available memory. By default, `size` is unlimited.
 
-`ringSize` sets the number of items stored in each ring. This defaults to 1000,
+`ringSize` sets the number of items stored in each ring. This defaults to 1024,
 which is normally fine for most purposes. Dynamic resizing is done in chunks of
 `ringSize` items (i.e. one buffer at a time).
 
-Both `maxItems` and `ringSize` are optional.
+Both `size` and `ringSize` are optional.
 
 Spique can also be used as an iterator - this pattern will call dequeue() until
 the queue is empty.
+
 ```javascript
 for(myValue of s) {
   doSomething(myValue);
 }
 ```
 
-### .push(), .enqueue()
+### .enqueue(value, isSource = false, applyTransforms = true)
 ```javascript
-s.push(myValue...);
-s.enqueue(myValue...);
+s.enqueue(myValue);
+s.enqueue([1,2,3,4,5], true)
 ```
-Append a value to the end of the queue. If a max queue size has been set, and the
-queue is full, then this method will return an error. `enqueue()` and `push()` are
-synonymous.
+Append a value to the tail of the queue. If a max queue size has been set, and the
+queue is full, then this method will throw an error.
 
-If more than one value is supplied, then they will all be added to the queue
-in the order that they are supplied.
+If `isSource` is true, then `value` will be treated as an iterator. All items
+returned by the iterator will be added to the queue as space allows. If the
+queue is full, the iterator will be called again once there is space available.
 
-### .pushAsync(), .enqueueAsync()
+If `isSource` is true and `value` is another `Spique` instance, then in
+addition to being added as an iterator, it will also be watched for new data.
+If `value` is closed, then the queue into which it is feeding will also close
+once there is no more data available.
+
+### .dequeue()
 ```javascript
-  for (let item of items) {
-    await s.pushAsync(item);
-  }
-```
-Asynchronous version of `push()` / `enqueue()`, returning a `Promise`. Allows
-for backpressure and feeding the queue at the same rate items are removed from
-it.
-
-### .shift(), .dequeue()
-```javascript
-var myValue = s.shift();
 var myValue = s.dequeue();
 ```
 Return the value at the head of the queue, and remove it from the queue. If the
-queue is empty, this method will return undefined. `dequeue()` and `shift()` are
-synonymous.
+queue is empty, this method will throw an error.
 
-### .unshift()
+### .enqueueHead(value, isSource = false, applyTransforms = true)
 ```javascript
 s.unshift(myValue...);
 ```
-Prepend a value to the head of the queue. If a max queue size has been set, and
-the queue is full, then this method will return an error.
+Identical to `.enqueue()`, except that items are prepended to the head of the
+queue instead of being appended to the tail.
 
-If more than one value is supplied, then they will all be added to the queue
-in the order that they are supplied.
-
-### .unshiftAsync()
-```javascript
-  for (let item of items) {
-    await s.unshiftAsync(item);
-  }
-```
-Asynchronous version of `unshift()`, returning a `Promise`. Allows
-for backpressure and feeding the queue at the same rate items are removed from
-it.
-
-### .pop()
+### .dequeueTail()
 ```javascript
 var myValue = s.pop();
 ```
-Return the value at the end of the queue, and remove it from the queue. If the
-queue is empty, then this method will return undefined.
+Identical to `dequeue()`, except that itemd are removed from the tail of the
+queue, rather than from the head.
 
-### .last(), .peek()
+### .peek()
 ```javascript
-var myValue = s.last();
 var myValue = s.peek();
 ```
-Return the value at the end of the queue. The value is not removed. If the queue
-is empty, then this method will return undefined. `last()` and `peek()` are synonymous.
+Return the value at the head of the queue. The value is not removed. If the
+queue is empty, then this method will throw an error.
 
-### .first(), .peekStart()
+### .peekTail()
 ```javascript
-var myValue = s.first();
-var myValue = s.peekStart();
+var myValue = s.peekTail();
 ```
-Return the value at the head of the queue. The value is not removed. If the queue
-is empty, then this method will return undefined. `first()` and `peekStart()` are
-synonymous.
+Return the value at the end of the queue. The value is not removed. If the
+queue is empty, then this method will throw an error.
 
-### .close([ttl = 0])
+### .transform(transformFn)
+```javascript
+s.transform(n => n * n);
+s.transform(function*(n) {
+    while (n > 0) {
+        yield n--;
+    }
+});
+```
+Apply the provided transform function to all items as they are inserted into
+the queue. More than one transform function can be registered - if this is the
+case, they are run in order from oldest to newest, and the final output from
+the transform pipeline is what eventually gets inserted.
+
+If `transformFn` is a generator function, then every result it yields will be
+processed individually by the remainder of the transform pipeline and inserted
+as a separate value.
+
+### .close()
 ```javascript
 s.on("close", queue => {
-  // there are no items remaining and the queue is closed
+  // there are no items remaining and the queue is now closed
 });
 s.close(); // close immediately
-s.close(500); // close once 500 items have been inserted
 ```
-Mark the queue as closed. A closed queue will never emit a `space` event, and will
-emit a `close` event once the queue is completely empty and all pending items have
-been processed.
+Mark the queue as closed. A closed queue will never emit a `free` event, and
+will emit a `close` event once the queue is completely empty and all pending
+items have been processed.
 
-If a TTL parameter is provided, then the queue will automatically close once the
-total number of inserted items during the life of the queue reaches the ttl. The
-queue will also emit `ttl-in` and `ttl-out` events.
-
-Please note that items cannot be inserted into a closed queue, including pending
-asynchronous inserts. Any inserts pending at the time the queue closes will fail.
-
-### .isClosed()
-```javascript
-if (s.isClosed()) {
-    // the queue is marked as closed
-}
-```
-Check whether the queue is marked as closed. Note that this does _not_ mean that
-the queue is empty. When the queue is both closed _and_ empty, then a `close` event
-will be emitted.
-
-### .isEmpty()
-```javascript
-if (s.isEmpty()) {
-    // the queue is empty
-}
-```
-Check whether the queue is currently empty.
-
-### .isFull()
-```javascript
-if (s.isFull()) {
-    // the queue is full
-}
-```
-Check whether the queue is currently empty.
-
-### .apply(transform, [reverse = false, [...constructorParams]])
-Apply a transform function to all items traversing the queue, and return another
-queue containing the results. The transform function may be either a regular function,
-or a generator (e.g. if the transformation does not result in exactly one output item
-for each input).
-
-By default, items will be removed from the start of the queue (`dequeue()`) and
-added to the end of the result queue (`enqueue()`). However, if `reverse` is true,
-then items will be removed using `pop()` and added to the result queue using
-`unshift()`.
-
-Any remaining parameters will be passed directly to the constructor for the result
-queue.
-
-### .fillFrom(source, [unshift = false])
-```javascript
-let source = (function*() {
-  yield 1;
-  yield 2;
-  yield 3;
-})();
-
-s.fillFrom(source);
-```
-Fill the queue as needed from the provided source. The source must be a live instance
-of a generator or iterator.
+Please note that items cannot be inserted into a closed queue. However if the
+queue is being fed from a source, then this will continue until the source is
+empty. It's also possible to continue inserting into a queue that has been
+marked closed, but has not yet been emptied.
 
 ### Properties
 #### .length
 The number of items currently stored in the queue.
 
-#### .capacity
-The current capacity of the queue - this will grow as items are inserted.
+#### .size
+The maximum capacity of the queue - if unlimited, this will be zero.
 
-#### .maxItems
-The maximum number of items allowed in the buffer at any given time. If this is
-unlimited, then maxItems will be zero.
+#### .free
+The number of available slots remaining in the queue.
+
+#### .closed
+Whether the queue is closed. If the queue has been marked closed, but still
+contains items, then this will return false until the queue is empty.
 
 #### .ringSize
 The size of each circular buffer. The queue will grow / shrink by this many items
 at a time.
 
-#### .lifetimeIn
-The total number of items that have ever been inserted (exluding pending
-asynchronous inserts).
-
-#### .lifetimeOut
-The total number of items that have ever been removed.
-
-#### .ttl
-The queue TTL. Zero if there is no TTL set.
-
 ### Events
 Event handlers will be called immediately upon attachment if the queue is
 currently in a state where entering that state would have emitted the target
 event. For example, if the queue contains one or more items, and a listener
-is attached for the `ready` event, it will be called immediately.
+is attached for the `data` event, it will be called immediately.
 
-#### ready
-The queue has one or more items stored in it.
+#### data
+The queue has one or more items stored in it. 
 
 #### full
 The queue is full.
 
+#### free
+The queue has space available to store more items. Note that even if you
+receive a `free` event, if the queue is of a limited size then you should still
+check that there is space available before inserting, as this event may have
+multiple listeners, and you might not be the first one to receive it - somebody
+else might have filled up the queue before you.
+
 #### empty
-The queue is empty.
+The queue is empty. The same caveats as `free` apply here too.
 
 #### close
 The queue is empty, and the queue is marked as closed.
-
-#### ttl-in
-The total number of inserted items has reached the TTL.
-
-#### ttl-out
-The total number of removed items has reached the TTL.
-
-#### space
-The queue has space available to store more items.
