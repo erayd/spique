@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node --expose-gc
+#!/usr/bin/env node
 "use strict";
 
 const assert = require("assert");
