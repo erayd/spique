@@ -176,7 +176,7 @@ module.exports = class Spique extends EventEmitter {
             return headRing.peekStart();
         }
 
-        // peek at the value at the head of the queue
+        // peek at the value at the tail of the queue
         function peekTail() {
             if (!items) throw new Error("Queue is empty");
 
