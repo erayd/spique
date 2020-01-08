@@ -32,10 +32,10 @@ module.exports = class Spique extends EventEmitter {
             // get the size of the queue
             size: { value: size, writable: false, enumerable: true },
 
-            // get the current number of items in the buffer
+            // get the current number of items in the queue
             length: { get: () => items, enumerable: true },
 
-            // get the current number of free slots in the buffer
+            // get the current number of free slots in the queue
             free: {
                 get: () => (size ? size - items : Number.MAX_SAFE_INTEGER),
                 enumerable: true
