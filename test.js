@@ -135,7 +135,7 @@ const Spique = require("./spique.js");
     }
 }
 
-// iterator
+// iterator & chaining
 {
     // iterate out
     let s = new Spique(10);
