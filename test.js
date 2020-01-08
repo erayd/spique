@@ -167,6 +167,18 @@ const GeneratorFunction = function*() {}.prototype.constructor;
     s3.dequeueTail();
     assert(s3.closed === true);
     assert(closed === true);
+
+    let s4 = new Spique();
+    s4.enqueue(1);
+    s4.close();
+    s4.enqueue(2);
+    assert(s4.length === 2);
+    s4.dequeue();
+    s4.dequeue();
+    try {
+        s4.enqueue(3);
+        assert(false);
+    } catch (err) {}
 }
 
 // iterator & chaining
