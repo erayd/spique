@@ -83,7 +83,7 @@ module.exports = class Spique extends EventEmitter {
         });
 
         // attach chained source (iterator | generator | Spique)
-        function attachSource(source, forward = true, applyTransforms = true) {
+        async function attachSource(source, forward = true, applyTransforms = true) {
             let insert = forward ? "enqueue" : "enqueueHead";
             if (source instanceof Spique) {
                 source.on("data", s => {
@@ -92,16 +92,30 @@ module.exports = class Spique extends EventEmitter {
                 source.on("close", () => this.close());
                 return;
             } else if (Symbol.iterator in source) source = source[Symbol.iterator]();
-            let feed = target => {
-                while (target.free) {
-                    let next = source.next();
-                    if (next.done) {
-                        target.removeListener("free", feed);
-                        break;
-                    } else target[insert](next.value, false, applyTransforms);
+            if (Symbol.asyncIterator in source) {
+                for await (let next of source) {
+                    await new Promise(async resolve => {
+                        let feed = target => {
+                            if (target.free) {
+                                target[insert](next, false, applyTransforms);
+                                resolve();
+                            } else this.once("free", feed);
+                        };
+                        feed(this);
+                    });
                 }
-            };
-            this.on("free", feed);
+            } else {
+                let feed = target => {
+                    while (target.free) {
+                        let next = source.next();
+                        if (next.done) {
+                            target.removeListener("free", feed);
+                            break;
+                        } else target[insert](next.value, false, applyTransforms);
+                    }
+                };
+                this.on("free", feed);
+            }
         }
 
         // apply transforms & return a generator instance

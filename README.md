@@ -51,6 +51,10 @@ If `isSource` is true, then `value` will be treated as an iterator. All items
 returned by the iterator will be added to the queue as space allows. If the
 queue is full, the iterator will be called again once there is space available.
 
+If `isSource` is true and `value` is an asynchronous iterator, then Spique will
+wait for each yielded promise to resolve before adding it to the queue, and
+before requesting another value from the iterator.
+
 If `isSource` is true and `value` is another `Spique` instance, then in
 addition to being added as an iterator, it will also be watched for new data.
 If `value` is closed, then the queue into which it is feeding will also close

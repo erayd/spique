@@ -245,6 +245,18 @@ const GeneratorFunction = function*() {}.prototype.constructor;
     for (let noop of s4);
     assert(s4.closed === true);
     assert(closed === true);
+
+    // async
+    (async () => {
+        let g = async function*(limit) {
+            for (let i = 0; i < limit; i++) yield i;
+        };
+        let s = new Spique(5);
+        s.enqueue(g(10), true);
+        await new Promise(resolve => s.on("full", resolve));
+        assert(s.length === 5);
+        assert(s.dequeue() === 0);
+    })();
 }
 
 // transforms
