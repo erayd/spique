@@ -106,15 +106,17 @@ module.exports = class Spique extends EventEmitter {
                 }
             } else {
                 let feed = target => {
+                    let again = true;
                     while (target.free) {
                         let next = source.next();
                         if (next.done) {
-                            target.removeListener("free", feed);
+                            again = false;
                             break;
                         } else target[insert](next.value, false, applyTransforms);
                     }
+                    if (again) this.once("free", feed);
                 };
-                this.on("free", feed);
+                feed(this);
             }
         }
 
