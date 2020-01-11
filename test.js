@@ -257,6 +257,17 @@ const GeneratorFunction = function*() {}.prototype.constructor;
         assert(s.length === 5);
         assert(s.dequeue() === 0);
     })();
+
+    // full
+    let s5 = new Spique(1);
+    s5.enqueue(1);
+    s5.enqueue((function*() {
+        yield 2;
+    })(), true);
+    assert(s5.length === 1);
+    assert(s5.dequeue() === 1);
+    assert(s5.length === 1);
+    assert(s5.dequeue() === 2);
 }
 
 // transforms
