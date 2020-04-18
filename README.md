@@ -103,6 +103,12 @@ s.transform(function*(n) {
         yield n--;
     }
 });
+s.transform((n, reject) => {
+    if (n < 1) {
+        reject();
+    }
+    return n * n;
+});
 ```
 Apply the provided transform function to all items as they are inserted into
 the queue. More than one transform function can be registered - if this is the
@@ -112,6 +118,10 @@ the transform pipeline is what eventually gets inserted.
 If `transformFn` is a generator function, then every result it yields will be
 processed individually by the remainder of the transform pipeline and inserted
 as a separate value.
+
+The second argument to `transformFn` is a reject callback. If this is called,
+then the value is silently dropped, and will not be enqueued or processed
+further.
 
 ### .close()
 ```javascript

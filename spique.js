@@ -136,7 +136,11 @@ module.exports = class Spique extends EventEmitter {
                     })();
                 } else {
                     result = (function*() {
-                        for (let r of input) yield transform(r);
+                        for (let r of input) {
+                            let reject = false;
+                            r = transform(r, () => reject = true);
+                            if (!reject) yield r;
+                        }
                     })();
                 }
             }

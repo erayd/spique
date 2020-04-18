@@ -275,9 +275,14 @@ const GeneratorFunction = function*() {}.prototype.constructor;
     let s = new Spique();
 
     // plain functions
+    s.transform((value, reject) => {
+        if (value === 9) reject();
+        return value;
+    });
     s.transform(value => value * value);
     s.transform(value => value + 3);
     s.enqueue(2);
+    s.enqueue(9);
     assert(s.length === 1);
     assert(s.dequeue() === 7);
 
@@ -293,6 +298,7 @@ const GeneratorFunction = function*() {}.prototype.constructor;
 
     // backwards
     s.enqueueHead(2);
+    s.enqueueHead(9);
     assert(s.length === 7);
     assert(s.dequeue() === 1);
     assert(s.dequeueTail() === 7);
